@@ -38,6 +38,15 @@ function Navibar() {
 
           <li>
             <Link
+              to="/products"
+              className="text-secondary hover:text-accent transition"
+            >
+              Products
+            </Link>
+          </li>
+
+          <li>
+            <Link
               to="/contact"
               className="text-secondary hover:text-accent transition"
             >
