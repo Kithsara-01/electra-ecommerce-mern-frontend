@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
+import ProtectedRoute from "./routes/ProtectedRoute";
+
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
 import SupplierRegister from "./pages/SupplierRegister";
@@ -10,6 +12,10 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
+
+
+
+
 function App() {
   return (
     <>
@@ -17,7 +23,7 @@ function App() {
         position="top-right"
         reverseOrder={false}
         toastOptions={{
-          duration: 2500,
+          duration: 8000,
           style: {
             borderRadius: "10px",
             background: "#333",
@@ -44,20 +50,35 @@ function App() {
         <Route path="/supplier-register" element={<SupplierRegister />} />
 
         {/* Dashboard Routes */}
+        
         <Route
           path="/customer-dashboard"
-          element={<CustomerDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["Customer"]}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/supplier-dashboard"
-          element={<SupplierDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["Supplier"]}>
+              <SupplierDashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/admin-dashboard"
-          element={<AdminDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
+
+
       </Routes>
     </>
   );
