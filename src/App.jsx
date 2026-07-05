@@ -11,6 +11,7 @@ import CustomerRegister from "./pages/CustomerRegister";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Product from "./pages/Products";
 
 
 
@@ -77,8 +78,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-
+        <Route
+          path="/products"
+          element={<Product />}
+        />
       </Routes>
     </>
   );
