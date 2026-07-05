@@ -46,4 +46,20 @@ export const logoutUser = async () => {
   return response.data;
 };
 
+// ===============================
+// Get My Profile
+// ===============================
+export const getMyProfile = async () => {
+  const response = await API.get("/users/profile");
+  return response.data;
+};
+
+// ===============================
+// Update My Profile
+// ===============================
+export const updateMyProfile = async (userData) => {
+  const response = await API.put("/users/profile", userData);
+  return response.data;
+};
+
 export default API;
