@@ -9,6 +9,7 @@ import CustomerRegister from "./pages/CustomerRegister";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Product from "./pages/Products";
 
 function App() {
   return (
@@ -57,6 +58,10 @@ function App() {
         <Route
           path="/admin-dashboard"
           element={<AdminDashboard />}
+        />
+        <Route
+          path="/products"
+          element={<Product />}
         />
       </Routes>
     </>
