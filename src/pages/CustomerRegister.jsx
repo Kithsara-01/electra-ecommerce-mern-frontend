@@ -69,7 +69,7 @@ function CustomerRegister() {
 
       await registerCustomer(formData);
 
-      toast.success("Customer account created successfully!");
+      toast.success("Customer account created successfully!"); // success message ekak show karann kiyana eka
 
       setFormData({
         name: "",

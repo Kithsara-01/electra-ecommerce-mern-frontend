@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const data = await getMyProfile();
-      setUser(data);
+      setUser(data.user);
 
     } catch (error) {
       setUser(null);
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 
     const data = await getMyProfile();
 
-    setUser(data);
+    setUser(data.user);
   };
 
   // ===============================
