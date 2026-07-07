@@ -38,14 +38,21 @@ export const AuthProvider = ({ children }) => {
 
     const data = await getMyProfile();
 
+     console.log("Profile Response:", data);
+
     setUser(data.user);
+
+    return data.user;
+    
   };
 
   // ===============================
   // Logout
   // ===============================
   const logout = async () => {
+
     await logoutUser();
+
     setUser(null);
   };
 
@@ -69,5 +76,7 @@ export const AuthProvider = ({ children }) => {
 // Custom Hook
 // ===============================
 export const useAuth = () => {
+
   return useContext(AuthContext);
+
 };

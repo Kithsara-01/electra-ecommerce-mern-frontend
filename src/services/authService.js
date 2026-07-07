@@ -33,7 +33,9 @@ export const registerSupplier = async (userData) => {
 // Login
 // ===============================
 export const loginUser = async (userData) => {
+
   const response = await API.post("/auth/login", userData);
+
   return response.data;
 };
 
@@ -42,7 +44,9 @@ export const loginUser = async (userData) => {
 // Logout
 // ===============================
 export const logoutUser = async () => {
+
   const response = await API.post("/auth/logout");
+
   return response.data;
 };
 
@@ -50,7 +54,9 @@ export const logoutUser = async () => {
 // Get My Profile
 // ===============================
 export const getMyProfile = async () => {
+
   const response = await API.get("/users/profile");
+
   return response.data;
 };
 
@@ -58,7 +64,9 @@ export const getMyProfile = async () => {
 // Update My Profile
 // ===============================
 export const updateMyProfile = async (userData) => {
+
   const response = await API.put("/users/profile", userData);
+  
   return response.data;
 };
 
