@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { loginUser } from "../services/authService";
+
 
 import { MdEmail } from "react-icons/md";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
+import { useAuth } from "../context/AuthContext";
+
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,14 +34,16 @@ function Login() {
     try {
       setLoading(true);
 
-      const response = await loginUser(formData);
+      const user = await login(formData);
+
+      console.log("Returned User:", user);
 
       toast.success("Login successful!");
 
-      const user = response.user;
+      // const user = response.user;
 
       setTimeout(() => {
-        if (user.role === "Admin") {
+        if (user.role === "Admin") {   // user kiyala enne backened eken ena response eken
           navigate("/admin-dashboard");
         } else if (user.role === "Customer") {
           navigate("/customer-dashboard");
