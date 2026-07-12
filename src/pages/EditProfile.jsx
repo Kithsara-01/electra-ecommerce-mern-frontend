@@ -8,20 +8,62 @@ import {
   FaLock,
 } from "react-icons/fa";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
+import { updateMyProfile } from "../services/authService";
+import toast from "react-hot-toast";
 
 import defaultProfile from "../assets/default-profile.png";
 
 function EditProfile() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loadUser } = useAuth();
+
+  const [formData, setFormData] = useState({
+      name: user?.name || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+      profileImage: user?.profileImage || "",
+    });
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+
+  const handleChange = (e) => {
+      let { name, value } = e.target;
+
+      if (name === "phone") {
+        value = value.replace(/\D/g, "").slice(0, 10);
+      }
+
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await updateMyProfile(formData);
+
+      await loadUser();
+
+      toast.success(response.message);
+
+      navigate("/profile");
+
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update profile"
+      );
+    }
+  };      
+
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+
+
 
   return (
     <div className="min-h-screen bg-primary px-6 py-10">
@@ -88,7 +130,9 @@ function EditProfile() {
 
               <input
                 type="text"
-                defaultValue={user?.name}
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
               />
 
@@ -117,8 +161,12 @@ function EditProfile() {
               </label>
 
               <input
-                type="text"
-                defaultValue={user?.phone}
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                maxLength={10}
+                inputMode="numeric"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
               />
 
@@ -133,7 +181,9 @@ function EditProfile() {
 
               <textarea
                 rows="4"
-                defaultValue={user?.address}
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-accent"
               />
 
@@ -143,6 +193,7 @@ function EditProfile() {
             <div className="mt-8">
 
               <button
+                onClick={handleSubmit}
                 className="w-full bg-accent text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-teal-700 transition duration-300 cursor-pointer"
               >
                 <FaSave />
