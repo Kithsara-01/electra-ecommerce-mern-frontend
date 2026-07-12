@@ -13,6 +13,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import MyOrders from "./pages/MyOrders";
+import Product from "./pages/Products";
+
 
 
 
@@ -63,8 +65,9 @@ function App() {
         <Route path="/my-orders" element={ <ProtectedRoute allowedRoles={["Customer"]}> <MyOrders /> </ProtectedRoute> }/>
         <Route path="/supplier-dashboard" element={<ProtectedRoute allowedRoles={["Supplier"]}> <SupplierDashboard /></ProtectedRoute>}/>
         <Route path="/admin-dashboard" element={ <ProtectedRoute allowedRoles={["Admin"]}> <AdminDashboard /> </ProtectedRoute>} />
-
-
+        
+        <Route path="/products" element={<Product />} />
+          
       </Routes>
     </>
   );
