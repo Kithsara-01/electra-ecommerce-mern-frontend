@@ -42,15 +42,22 @@ function Login() {
 
       // const user = response.user;
 
-      setTimeout(() => {
-        if (user.role === "Admin") {   // user kiyala enne backened eken ena response eken
+      
+        if (user.role === "Customer") {
+
+          navigate("/");
+
+        } else if (user.role === "Admin") {
+
           navigate("/admin-dashboard");
-        } else if (user.role === "Customer") {
-          navigate("/customer-dashboard");
+
         } else if (user.role === "Supplier") {
+
           navigate("/supplier-dashboard");
+
         }
-      }, 1000);
+
+      
 
     } catch (error) {
       toast.error(

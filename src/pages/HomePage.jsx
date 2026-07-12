@@ -1,6 +1,35 @@
 import Header from "../components/Header";
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+
 function HomePage() {
+
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (user?.role === "Admin") {
+      navigate("/admin-dashboard");
+    }
+
+    if (user?.role === "Supplier") {
+      navigate("/supplier-dashboard");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return null;
+  }
+
+  if (user?.role === "Admin" || user?.role === "Supplier") {
+    return null;
+  }
+
   return (
     <>
       <Header />

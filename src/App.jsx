@@ -8,9 +8,11 @@ import Login from "./pages/Login";
 import SupplierRegister from "./pages/SupplierRegister";
 import CustomerRegister from "./pages/CustomerRegister";
 
-import CustomerDashboard from "./pages/CustomerDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import MyOrders from "./pages/MyOrders";
 import Product from "./pages/Products";
 
 
@@ -24,7 +26,7 @@ function App() {
         position="top-right"
         reverseOrder={false}
         toastOptions={{
-          duration: 8000,
+          duration: 5000,
           style: {
             borderRadius: "10px",
             background: "#333",
@@ -52,36 +54,20 @@ function App() {
 
         {/* Dashboard Routes */}
         
-        <Route
-          path="/customer-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["Customer"]}>
+        {/* <Route path="/customer-dashboard" element={ <ProtectedRoute allowedRoles={["Customer"]}>
               <CustomerDashboard />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
-        <Route
-          path="/supplier-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["Supplier"]}>
-              <SupplierDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/products"
-          element={<Product />}
-        />
+        <Route path="/profile" element={ <ProtectedRoute allowedRoles={["Customer"]}> <Profile /> </ProtectedRoute> } />
+        <Route path="/edit-profile" element={<ProtectedRoute allowedRoles={["Customer"]}> <EditProfile /></ProtectedRoute> } />
+        <Route path="/my-orders" element={ <ProtectedRoute allowedRoles={["Customer"]}> <MyOrders /> </ProtectedRoute> }/>
+        <Route path="/supplier-dashboard" element={<ProtectedRoute allowedRoles={["Supplier"]}> <SupplierDashboard /></ProtectedRoute>}/>
+        <Route path="/admin-dashboard" element={ <ProtectedRoute allowedRoles={["Admin"]}> <AdminDashboard /> </ProtectedRoute>} />
+        
+        <Route path="/products" element={<Product />} />
+          
       </Routes>
     </>
   );
