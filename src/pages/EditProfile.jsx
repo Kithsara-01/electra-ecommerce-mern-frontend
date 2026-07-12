@@ -11,20 +11,26 @@ import {
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
-import { updateMyProfile } from "../services/authService";
+import {updateMyProfile, changePassword,} from "../services/authService";
 import toast from "react-hot-toast";
 
 import defaultProfile from "../assets/default-profile.png";
 
 function EditProfile() {
   const navigate = useNavigate();
-  const { user, loadUser } = useAuth();
+  const { user, loadUser, logout } = useAuth();
 
   const [formData, setFormData] = useState({
       name: user?.name || "",
       phone: user?.phone || "",
       address: user?.address || "",
       profileImage: user?.profileImage || "",
+    });
+
+    const [passwordData, setPasswordData] = useState({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -37,6 +43,15 @@ function EditProfile() {
       }
 
       setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
+
+  const handlePasswordChangeInput = (e) => {
+      const { name, value } = e.target;
+
+      setPasswordData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
@@ -57,7 +72,29 @@ function EditProfile() {
         error.response?.data?.message || "Failed to update profile"
       );
     }
-  };      
+  };     
+  
+    const handlePasswordSubmit = async () => {
+    try {
+
+      const response = await changePassword(passwordData);
+
+      toast.success(response.message);
+
+      // Logout user
+      await logout();
+
+      // Redirect to login page
+      navigate("/login");
+
+    } catch (error) {
+
+      toast.error(
+        error.response?.data?.message || "Failed to change password."
+      );
+
+    }
+  };
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -210,7 +247,7 @@ function EditProfile() {
           <div className="bg-white rounded-3xl shadow-xl p-8">
 
             <h2 className="text-2xl font-bold text-secondary mb-8">
-              Security
+              Change Password
             </h2>
                         {/* Current Password */}
             <div>
@@ -223,6 +260,9 @@ function EditProfile() {
 
                 <input
                   type={showCurrentPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChangeInput}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
                 />
 
@@ -256,6 +296,9 @@ function EditProfile() {
 
                 <input
                   type={showNewPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChangeInput}
                   placeholder="Enter new password"
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
                 />
@@ -288,6 +331,9 @@ function EditProfile() {
 
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChangeInput}
                   placeholder="Confirm new password"
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
                 />
@@ -313,15 +359,15 @@ function EditProfile() {
             <div className="mt-6 rounded-xl bg-gray-50 border border-gray-200 p-4">
 
               <h3 className="font-semibold text-secondary mb-2">
-                Password Requirements
+                To create Better password follow them,
               </h3>
 
               <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-                <li>Minimum 8 characters</li>
-                <li>At least one uppercase letter</li>
-                <li>At least one lowercase letter</li>
-                <li>At least one number</li>
-                <li>At least one special character</li>
+                <li>Use Minimum 8 characters</li>
+                <li>Use At least one uppercase letter</li>
+                <li>Use At least one lowercase letter</li>
+                <li>Use At least one number</li>
+                <li>Use At least one special character</li>
               </ul>
 
             </div>
@@ -330,6 +376,7 @@ function EditProfile() {
             <div className="mt-8">
 
               <button
+                onClick={handlePasswordSubmit}
                 className="w-full bg-secondary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-gray-900 transition duration-300 cursor-pointer"
               >
                 <FaLock />
