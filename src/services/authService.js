@@ -70,6 +70,19 @@ export const updateMyProfile = async (userData) => {
   return response.data;
 };
 
+// ===============================
+// Change Password
+// ===============================
+export const changePassword = async (passwordData) => {
+
+  const response = await API.put(
+    "/users/change-password",
+    passwordData
+  );
+
+  return response.data;
+};
+
 export default API;
 
 
