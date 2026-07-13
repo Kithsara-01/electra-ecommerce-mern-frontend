@@ -20,7 +20,15 @@ function AdminProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
   const adminName = user?.name || "Admin";
-  const adminImage = user?.profileImage || defaultProfile;
+
+//////////////  
+  //const adminImage = user?.profileImage || defaultProfile;
+
+const adminImage = user?.profileImage
+  ? `${user.profileImage}?t=${Date.now()}`
+  : defaultProfile;
+
+////////
 
   const menuItems = [
     {
