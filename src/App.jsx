@@ -15,6 +15,11 @@ import EditProfile from "./pages/EditProfile";
 import MyOrders from "./pages/MyOrders";
 import Product from "./pages/Products";
 
+import AdminProfile from "./pages/AdminProfile";
+import AdminEditProfile from "./pages/AdminEditProfile";
+import AdminProducts from "./pages/AdminProducts";
+import AdminUsers from "./pages/AdminUsers";
+import AdminOrders from "./pages/AdminOrders";
 
 
 
@@ -26,7 +31,7 @@ function App() {
         position="top-right"
         reverseOrder={false}
         toastOptions={{
-          duration: 5000,
+          duration: 2500,
           style: {
             borderRadius: "10px",
             background: "#333",
@@ -52,19 +57,19 @@ function App() {
         <Route path="/customer-register" element={<CustomerRegister />} />
         <Route path="/supplier-register" element={<SupplierRegister />} />
 
-        {/* Dashboard Routes */}
         
-        {/* <Route path="/customer-dashboard" element={ <ProtectedRoute allowedRoles={["Customer"]}>
-              <CustomerDashboard />
-            </ProtectedRoute>
-          }
-        /> */}
 
         <Route path="/profile" element={ <ProtectedRoute allowedRoles={["Customer"]}> <Profile /> </ProtectedRoute> } />
         <Route path="/edit-profile" element={<ProtectedRoute allowedRoles={["Customer"]}> <EditProfile /></ProtectedRoute> } />
         <Route path="/my-orders" element={ <ProtectedRoute allowedRoles={["Customer"]}> <MyOrders /> </ProtectedRoute> }/>
         <Route path="/supplier-dashboard" element={<ProtectedRoute allowedRoles={["Supplier"]}> <SupplierDashboard /></ProtectedRoute>}/>
         <Route path="/admin-dashboard" element={ <ProtectedRoute allowedRoles={["Admin"]}> <AdminDashboard /> </ProtectedRoute>} />
+
+        <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminProfile /> </ProtectedRoute>} />
+        <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminEditProfile /> </ProtectedRoute>} />
+        <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminProducts /> </ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminUsers /> </ProtectedRoute>} />
+        <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminOrders /> </ProtectedRoute>} />
         
         <Route path="/products" element={<Product />} />
           
