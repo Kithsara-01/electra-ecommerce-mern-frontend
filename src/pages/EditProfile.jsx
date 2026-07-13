@@ -16,6 +16,11 @@ import toast from "react-hot-toast";
 
 import defaultProfile from "../assets/default-profile.png";
 
+import { supabase } from "../services/supabase";
+import { getMyProfile } from "../services/authService";
+
+
+
 function EditProfile() {
   const navigate = useNavigate();
   const { user, loadUser, logout } = useAuth();
@@ -26,6 +31,11 @@ function EditProfile() {
       address: user?.address || "",
       profileImage: user?.profileImage || "",
     });
+
+    const [selectedImage, setSelectedImage] = useState(null);
+        const [previewImage, setPreviewImage] = useState(
+          user?.profileImage || defaultProfile
+        );
 
     const [passwordData, setPasswordData] = useState({
       currentPassword: "",
@@ -48,6 +58,15 @@ function EditProfile() {
       }));
     };
 
+    const handleImageChange = (e) => {
+      const file = e.target.files[0];
+
+      if (!file) return;
+
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file));
+    };
+
   const handlePasswordChangeInput = (e) => {
       const { name, value } = e.target;
 
@@ -58,21 +77,76 @@ function EditProfile() {
     };
 
   const handleSubmit = async () => {
-    try {
-      const response = await updateMyProfile(formData);
+      try {
+        let imageUrl = user?.profileImage || "";
 
-      await loadUser();
+        // Upload new image if selected
+        if (selectedImage) {
 
-      toast.success(response.message);
+          // Delete old image
+          if (
+            user?.profileImage &&
+            user.profileImage.includes("/storage/v1/object/public/images/")
+          ) {
+            const oldFileName = user.profileImage.split("/images/")[1];
 
-      navigate("/profile");
+            const { error: deleteError } = await supabase.storage
+              .from("images")
+              .remove([oldFileName]);
 
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to update profile"
-      );
-    }
-  };     
+            if (deleteError) {
+              console.error(deleteError);
+            } else {
+              console.log("Old image deleted successfully");
+            }
+          }
+
+          // Upload new image
+          const fileName = `${Date.now()}-${selectedImage.name}`;
+
+          const { error } = await supabase.storage
+            .from("images")
+            .upload(fileName, selectedImage);
+
+          if (error) {
+            throw error;
+          }
+
+          const { data } = supabase.storage
+            .from("images")
+            .getPublicUrl(fileName);
+
+          imageUrl = data.publicUrl;
+
+          console.log("Uploaded URL:", imageUrl);
+        }
+
+        const response = await updateMyProfile({
+          ...formData,
+          profileImage: imageUrl,
+        });
+
+        await loadUser();
+
+        const latest = await getMyProfile();
+        console.log("Database returned:", latest.user.profileImage);
+
+        toast.success(response.message);
+
+        navigate("/profile");
+
+      } catch (error) {
+
+        console.error(error);
+
+        toast.error(
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update profile"
+        );
+
+      }
+    };
   
     const handlePasswordSubmit = async () => {
     try {
@@ -141,20 +215,26 @@ function EditProfile() {
             {/* Profile Image */}
             <div className="flex flex-col items-center mb-10">
 
-              <img
-                src={user?.profileImage || defaultProfile}
+             <img
+                src={previewImage}
                 alt="Profile"
                 className="w-36 h-36 rounded-full border-4 border-accent shadow-lg object-cover"
               />
 
-              <button
-                className="mt-5 flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-full hover:bg-teal-700 transition duration-300 cursor-pointer"
-              >
+              <label className="mt-5 flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-full hover:bg-teal-700 transition duration-300 cursor-pointer">
+
                 <FaCamera />
 
                 <span>Change Photo</span>
 
-              </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+
+              </label>
 
             </div>
 
