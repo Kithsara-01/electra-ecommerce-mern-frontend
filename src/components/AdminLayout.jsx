@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import logo from "../assets/electra-logo.png";
+import AdminProfileDropdown from "./AdminProfileDropdown";
 
 import {
   FaTachometerAlt,
@@ -38,7 +39,7 @@ function AdminLayout({ children }) {
 
           {/* Products */}
           <Link
-            to="#"
+            to="/admin/products"
             className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
           >
             <FaBoxOpen />
@@ -47,7 +48,7 @@ function AdminLayout({ children }) {
 
           {/* Users */}
           <Link
-            to="#"
+            to="/admin/users"
             className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
           >
             <FaUsers />
@@ -56,7 +57,7 @@ function AdminLayout({ children }) {
 
           {/* Orders */}
           <Link
-            to="#"
+            to="/admin/orders"
             className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
           >
             <FaShoppingCart />
@@ -73,13 +74,10 @@ function AdminLayout({ children }) {
             Admin Dashboard
           </h1>
 
-          {/* Temporary */}
-          <div className="text-gray-500 font-medium">
-            Welcome, Admin 👋
-          </div>
+          <AdminProfileDropdown />
         </header>
 
-        {/* Page */}
+        {/* Page Content */}
         <main className="flex-1 p-10">
           {children}
         </main>
