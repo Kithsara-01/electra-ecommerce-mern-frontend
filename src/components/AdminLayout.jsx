@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import logo from "../assets/electra-logo.png";
 import AdminProfileDropdown from "./AdminProfileDropdown";
@@ -10,7 +10,10 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 
-function AdminLayout({ children }) {
+function AdminLayout({ title = "Admin Dashboard", children }) {
+
+  const location = useLocation();
+  
   return (
     <div className="min-h-screen flex bg-primary">
       {/* ================= Sidebar ================= */}
@@ -31,7 +34,12 @@ function AdminLayout({ children }) {
           {/* Dashboard */}
           <Link
             to="/admin-dashboard"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-accent font-semibold transition"
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition
+                ${
+                  location.pathname === "/admin-dashboard"
+                    ? "bg-primary text-accent font-semibold"
+                    : "text-secondary hover:bg-primary"
+                }`}          
           >
             <FaTachometerAlt />
             Dashboard
@@ -40,7 +48,11 @@ function AdminLayout({ children }) {
           {/* Products */}
           <Link
             to="/admin/products"
-            className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
+            className={`mt-2 flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              location.pathname === "/admin/products"
+                ? "bg-primary text-accent font-semibold"
+                : "text-secondary hover:bg-primary"
+            }`}
           >
             <FaBoxOpen />
             Products
@@ -49,8 +61,13 @@ function AdminLayout({ children }) {
           {/* Users */}
           <Link
             to="/admin/users"
-            className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
+            className={`mt-2 flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              location.pathname === "/admin/users"
+                ? "bg-primary text-accent font-semibold"
+                : "text-secondary hover:bg-primary"
+            }`}
           >
+
             <FaUsers />
             Users
           </Link>
@@ -58,8 +75,13 @@ function AdminLayout({ children }) {
           {/* Orders */}
           <Link
             to="/admin/orders"
-            className="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-secondary hover:bg-primary transition"
+            className={`mt-2 flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              location.pathname === "/admin/orders"
+                ? "bg-primary text-accent font-semibold"
+                : "text-secondary hover:bg-primary"
+            }`}
           >
+            
             <FaShoppingCart />
             Orders
           </Link>
@@ -71,7 +93,7 @@ function AdminLayout({ children }) {
         {/* Header */}
         <header className="bg-white border-b border-border px-10 py-7 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-secondary">
-            Admin Dashboard
+            {title}
           </h1>
 
           <AdminProfileDropdown />

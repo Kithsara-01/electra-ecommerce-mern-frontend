@@ -1,3 +1,5 @@
+import AdminAddProduct from "./pages/AdminAddProduct";
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
@@ -68,6 +70,7 @@ function App() {
         <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminProfile /> </ProtectedRoute>} />
         <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminEditProfile /> </ProtectedRoute>} />
         <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminProducts /> </ProtectedRoute>} />
+        <Route path="/admin/products/add" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminAddProduct /></ProtectedRoute>}/>
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminUsers /> </ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminOrders /> </ProtectedRoute>} />
         
