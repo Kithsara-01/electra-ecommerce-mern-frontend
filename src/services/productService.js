@@ -20,6 +20,15 @@ export const getAllProducts = async (params) => {
 
   return response.data;
 };
+// ===============================
+// Get All Products (Admin)
+// ===============================
+export const getAllAdminProducts = async (params) => {
+
+  const response = await API.get("/products/admin", { params });
+
+  return response.data;
+};
 
 
 // ===============================
@@ -43,6 +52,24 @@ export const updateProduct = async (productId, productData) => {
   return response.data;
 };
 
+// ===============================
+// Toggle Product Availability
+// ===============================
+export const updateProductAvailability = async (
+  productId,
+  isAvailable
+) => {
+
+  const response = await API.put(
+    `/products/${productId}`,
+    {
+      isAvailable,
+    }
+  );
+
+  return response.data;
+
+};
 
 // ===============================
 // Delete Product

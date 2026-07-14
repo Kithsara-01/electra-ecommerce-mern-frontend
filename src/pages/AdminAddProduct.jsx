@@ -563,6 +563,7 @@ useEffect(() => {
 
             <button
                 type="button"
+                onClick={() => navigate("/admin/products")}
                 className="px-8 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
             >
                 Cancel
