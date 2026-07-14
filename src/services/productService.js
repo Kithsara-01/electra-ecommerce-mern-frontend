@@ -41,6 +41,15 @@ export const getProductById = async (productId) => {
   return response.data;
 };
 
+// ===============================
+// Search Products
+// ===============================
+export const searchProducts = async (query) => {
+
+  const response = await API.get(`/products/search/${encodeURIComponent(query)}`);
+
+  return response.data;
+};
 
 // ===============================
 // Update Product

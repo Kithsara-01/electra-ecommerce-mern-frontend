@@ -17,20 +17,48 @@ function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSort, setSelectedSort] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [updatingProductId, setUpdatingProductId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [deletingProductId, setDeletingProductId] = useState(null);
   
-  const fetchProducts = async () => {
+  const fetchProducts = async (
+    query = "",
+    category = "",
+    sort = "newest",
+    page = 1
+  ) => {
       try {
         setLoading(true);
         setError("");
 
-        const data = await getAllAdminProducts();
-        
+        const params = {
+          page,
+          limit: 10,
+        };
 
-        setProducts(data.products);
+        if (query) {
+          params.search = query;
+        }
+
+        if (category) {
+          params.category = category;
+        }
+
+        if (sort) {
+          params.sort = sort;
+        }
+
+        const data = await getAllAdminProducts(params);
+
+        setProducts(data.products || []);
+        setCurrentPage(data.currentPage || 1);
+        setTotalPages(data.totalPages || 1);
       } catch (error) {
         console.error("Fetch Products Error:", error);
 
@@ -39,9 +67,16 @@ function AdminProducts() {
         setLoading(false);
       }
     };
+
     useEffect(() => {
-        fetchProducts();
-      }, []);
+        setCurrentPage(1);
+
+        const timer = setTimeout(() => {
+          fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, 1);
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }, [searchTerm, selectedCategory, selectedSort]);
 
       const handleAvailabilityToggle = async (product) => {
         try {
@@ -58,7 +93,7 @@ function AdminProducts() {
             }.`
           );
 
-          await fetchProducts();
+          await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
         } catch (error) {
           console.error("Update Availability Error:", error);
 
@@ -89,7 +124,7 @@ function AdminProducts() {
 
           toast.success("Product deleted successfully.");
           closeDeleteModal();
-          await fetchProducts();
+          await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
         } catch (error) {
           console.error("Delete Product Error:", error);
           toast.error("Failed to delete product.");
@@ -132,7 +167,7 @@ function AdminProducts() {
       {/* Search & Filter */}
       <div className="mt-10 bg-white rounded-3xl shadow-xl p-6">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* Search */}
           <div className="relative">
@@ -144,6 +179,8 @@ function AdminProducts() {
             <input
               type="text"
               placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border border-gray-300 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
             />
 
@@ -151,51 +188,78 @@ function AdminProducts() {
 
           {/* Category */}
           <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
           >
 
-            <option>
+            <option value="">
               All Categories
             </option>
 
-            <option>
+            <option value="Laptop">
               Laptop
             </option>
 
-            <option>
+            <option value="Desktop">
               Desktop
             </option>
 
-            <option>
+            <option value="Monitor">
               Monitor
             </option>
 
-            <option>
+            <option value="Keyboard">
               Keyboard
             </option>
 
-            <option>
+            <option value="Mouse">
               Mouse
             </option>
 
-            <option>
+            <option value="Printer">
               Printer
             </option>
 
-            <option>
+            <option value="Storage">
               Storage
             </option>
 
-            <option>
+            <option value="Networking">
               Networking
             </option>
 
-            <option>
+            <option value="Accessories">
               Accessories
             </option>
 
-            <option>
+            <option value="Other">
               Other
+            </option>
+
+          </select>
+
+          {/* Sort */}
+          <select
+            value={selectedSort}
+            onChange={(e) => setSelectedSort(e.target.value)}
+            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+
+            <option value="newest">
+              Newest
+            </option>
+
+            <option value="oldest">
+              Oldest
+            </option>
+
+            <option value="priceLow">
+              Price: Low to High
+            </option>
+
+            <option value="priceHigh">
+              Price: High to Low
             </option>
 
           </select>
@@ -203,7 +267,8 @@ function AdminProducts() {
         </div>
 
       </div>
-            {/* Products Table */}
+
+      
       <div className="mt-8 bg-white rounded-3xl shadow-xl overflow-hidden">
 
         <div className="overflow-x-auto">
@@ -374,6 +439,30 @@ function AdminProducts() {
 
         </div>
 
+      </div>
+
+      <div className="mt-6 flex items-center justify-center gap-4">
+        <button
+          type="button"
+          onClick={() => fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage - 1)}
+          disabled={currentPage === 1 || loading}
+          className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Previous
+        </button>
+
+        <span className="text-sm font-medium text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage + 1)}
+          disabled={currentPage === totalPages || loading}
+          className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Next
+        </button>
       </div>
 
       {showDeleteModal && selectedProduct && (
