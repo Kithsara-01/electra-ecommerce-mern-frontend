@@ -1,11 +1,15 @@
-import { FaPlus, FaSearch, FaBoxOpen} from "react-icons/fa";
+import { FaPlus, FaSearch, FaBoxOpen, FaEdit, FaTrash } from "react-icons/fa";
 
 import toast from "react-hot-toast";
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
-import {getAllAdminProducts, updateProductAvailability } from "../services/productService";
+import {
+  deleteProduct,
+  getAllAdminProducts,
+  updateProductAvailability,
+} from "../services/productService";
 
 function AdminProducts() {
 
@@ -14,6 +18,9 @@ function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingProductId, setUpdatingProductId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [deletingProductId, setDeletingProductId] = useState(null);
   
   const fetchProducts = async () => {
       try {
@@ -35,6 +42,7 @@ function AdminProducts() {
     useEffect(() => {
         fetchProducts();
       }, []);
+
       const handleAvailabilityToggle = async (product) => {
         try {
           setUpdatingProductId(product.productId);
@@ -60,6 +68,35 @@ function AdminProducts() {
         }
       };
 
+      const handleDeleteClick = (product) => {
+        setSelectedProduct(product);
+        setShowDeleteModal(true);
+      };
+
+      const closeDeleteModal = () => {
+        setShowDeleteModal(false);
+        setSelectedProduct(null);
+        setDeletingProductId(null);
+      };
+
+      const handleDeleteConfirm = async () => {
+        if (!selectedProduct) return;
+
+        try {
+          setDeletingProductId(selectedProduct.productId);
+
+          await deleteProduct(selectedProduct.productId);
+
+          toast.success("Product deleted successfully.");
+          closeDeleteModal();
+          await fetchProducts();
+        } catch (error) {
+          console.error("Delete Product Error:", error);
+          toast.error("Failed to delete product.");
+        } finally {
+          setDeletingProductId(null);
+        }
+      };
 
 
 
@@ -249,7 +286,7 @@ function AdminProducts() {
                products.map((product) => (
                   <tr
                     key={product.productId}
-                    className="border-b border-gray-200 hover:bg-green-50 transition-colors duration-200"
+                    className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200"
                   >
 
                     <td className="px-6 py-4">
@@ -307,7 +344,24 @@ function AdminProducts() {
                     </td>
 
                     <td className="px-6 py-4 text-center">
-                      -
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          title="Edit Product"
+                          onClick={() => navigate(`/admin/products/edit/${product.productId}`)}
+                          className="inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition duration-200 ease-out cursor-pointer text-lg hover:scale-105 hover:text-[#2FA084] hover:bg-green-100"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          type="button"
+                          title="Delete Product"
+                          onClick={() => handleDeleteClick(product)}
+                          className="inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition duration-200 ease-out cursor-pointer text-lg hover:scale-105 hover:text-red-600 hover:bg-red-100"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </td>
 
                   </tr>
@@ -321,6 +375,51 @@ function AdminProducts() {
         </div>
 
       </div>
+
+      {showDeleteModal && selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <FaTrash className="text-xl text-red-600" />
+            </div>
+
+            <h3 className="text-center text-xl font-semibold text-secondary">
+              Delete Product
+            </h3>
+
+            <p className="mt-3 text-center text-sm leading-6 text-gray-600">
+              Are you sure you want to delete this product?
+              <br />
+              This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={deletingProductId === selectedProduct.productId}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition ${
+                  deletingProductId === selectedProduct.productId
+                    ? "cursor-not-allowed bg-red-400"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                {deletingProductId === selectedProduct.productId
+                  ? "Deleting..."
+                  : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </AdminLayout>
 

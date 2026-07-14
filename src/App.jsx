@@ -20,6 +20,7 @@ import Product from "./pages/Products";
 import AdminProfile from "./pages/AdminProfile";
 import AdminEditProfile from "./pages/AdminEditProfile";
 import AdminProducts from "./pages/AdminProducts";
+import AdminEditProduct from "./pages/AdminEditProduct";
 import AdminUsers from "./pages/AdminUsers";
 import AdminOrders from "./pages/AdminOrders";
 
@@ -71,6 +72,7 @@ function App() {
         <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminEditProfile /> </ProtectedRoute>} />
         <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminProducts /> </ProtectedRoute>} />
         <Route path="/admin/products/add" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminAddProduct /></ProtectedRoute>}/>
+        <Route path="/admin/products/edit/:productId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProduct /></ProtectedRoute>}/>
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminUsers /> </ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminOrders /> </ProtectedRoute>} />
         
