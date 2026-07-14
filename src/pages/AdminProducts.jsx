@@ -1,18 +1,67 @@
-import {
-  FaPlus,
-  FaSearch,
-  FaBoxOpen,
-} from "react-icons/fa";
+import { FaPlus, FaSearch, FaBoxOpen} from "react-icons/fa";
+
+import toast from "react-hot-toast";
 
 import { useNavigate } from "react-router-dom";
-
+import { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
-
-
+import {getAllAdminProducts, updateProductAvailability } from "../services/productService";
 
 function AdminProducts() {
 
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingProductId, setUpdatingProductId] = useState(null);
+  
+  const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getAllAdminProducts();
+        
+
+        setProducts(data.products);
+      } catch (error) {
+        console.error("Fetch Products Error:", error);
+
+        setError("Failed to load products.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    useEffect(() => {
+        fetchProducts();
+      }, []);
+      const handleAvailabilityToggle = async (product) => {
+        try {
+          setUpdatingProductId(product.productId);
+
+          await updateProductAvailability(
+            product.productId,
+            !product.isAvailable
+          );
+
+          toast.success(
+            `Product marked as ${
+              !product.isAvailable ? "Available" : "Not Available"
+            }.`
+          );
+
+          await fetchProducts();
+        } catch (error) {
+          console.error("Update Availability Error:", error);
+
+          toast.error("Failed to update product status.");
+        } finally {
+          setUpdatingProductId(null);
+        }
+      };
+
+
+
 
   return (
     <AdminLayout title="Products">
@@ -161,43 +210,112 @@ function AdminProducts() {
             </thead>
 
             <tbody>
+              {products.length === 0 ? (
 
-              <tr>
+                <tr>
 
-                <td
-                  colSpan="7"
-                  className="py-20 text-center"
-                >
+                  <td
+                    colSpan="7"
+                    className="py-20 text-center"
+                  >
 
-                  <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center">
 
-                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-5">
+                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-5">
 
-                      <FaBoxOpen className="text-4xl text-accent" />
+                        <FaBoxOpen className="text-4xl text-accent" />
+
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-secondary">
+
+                        No Products Found
+
+                      </h3>
+
+                      <p className="text-gray-500 mt-3">
+                        Click the <span className="font-semibold">"Add Product"</span> button above
+                        to create your first product.
+                      </p>
 
                     </div>
 
-                    <h3 className="text-2xl font-bold text-secondary">
+                  </td>
 
-                      No Products Found
+                </tr>
 
-                    </h3>
+              ) : (
 
-                    <p className="text-gray-500 mt-3">
-                      Click the <span className="font-semibold">"Add Product"</span> button above
-                      to create your first product.
-                    </p>
+               products.map((product) => (
+                  <tr
+                    key={product.productId}
+                    className="border-b border-gray-200 hover:bg-green-50 transition-colors duration-200"
+                  >
 
-                    
+                    <td className="px-6 py-4">
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    </td>
 
-                  </div>
+                    <td className="px-6 py-4 font-medium">
+                      {product.name}
+                    </td>
 
-                </td>
+                    <td className="px-6 py-4">
+                      {product.category}
+                    </td>
 
-              </tr>
+                    <td className="px-6 py-4">
+                      Rs. {product.price.toLocaleString()}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      {product.stock}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <div className="flex flex-col items-start gap-3">
+
+                        <button
+                            type="button"
+                            onClick={() => handleAvailabilityToggle(product)}
+                            disabled={updatingProductId === product.productId}
+                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                              updatingProductId === product.productId
+                                ? "opacity-60 cursor-not-allowed"
+                                : "cursor-pointer hover:scale-105"
+                            } ${
+                              product.isAvailable
+                                ? "bg-green-700 text-white hover:bg-green-600"
+                                : "bg-yellow-700 text-white hover:bg-yellow-600"
+                            }`}
+                        >
+                          {updatingProductId === product.productId
+                            ? "Updating..."
+                            : product.isAvailable
+                            ? "Available"
+                            : "Not Available"}
+                        </button>
+
+                       
+                      </div>
+
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      -
+                    </td>
+
+                  </tr>
+                ))
+
+              )}
 
             </tbody>
-
           </table>
 
         </div>
