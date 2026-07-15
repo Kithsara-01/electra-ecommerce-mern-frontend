@@ -2,13 +2,12 @@ import Navibar from "./Navibar";
 import SearchBar from "./SearchBar";
 
 
-function Header() {
+function Header({ showSearch = true }) {
   return (
     <header>
       <Navibar />
-      <SearchBar />
+      {showSearch && <SearchBar />}
     </header>
   );
 }
-
 export default Header;
