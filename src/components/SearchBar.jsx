@@ -1,30 +1,30 @@
 import { MdOutlineSearch } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
 
-function SearchBar() {
+function SearchBar({ value, onChange, onReset }) {
   return (
-    <div className="bg-white border-b border-border">
-      <div className="max-w-6xl mx-auto px-4 py-5">
-        <div className="flex items-center gap-3">
+    <div className="border-b border-slate-200 bg-white">
+      <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
+        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-2 shadow-sm">
           {/* Search Input */}
           <input
             type="text"
             placeholder="Search electronic items..."
-            className="flex-1 border border-gray-300 rounded-lg px-5 py-4 focus:outline-none"
+            value={value}
+            onChange={onChange}
+            className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-slate-400"
           />
 
           {/* Search Button */}
-          <button
-            className="w-12 h-12 flex items-center justify-center rounded-lg bg-accent text-white hover:opacity-85 transition duration-300 cursor-pointer"
-          >
-            <MdOutlineSearch className="text-2xl" />
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2FA084] text-white transition hover:opacity-90">
+            <MdOutlineSearch className="text-xl" />
           </button>
 
           {/* Reset Button */}
           <button
-            className="w-12 h-12 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:border-accent hover:text-accent hover:bg-gray-50 transition duration-300 cursor-pointer"
-          >
-            <RiResetLeftFill className="text-2xl" />
+            onClick={onReset}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-[#2FA084] hover:text-[#2FA084]">
+            <RiResetLeftFill className="text-xl" />
           </button>
         </div>
       </div>
