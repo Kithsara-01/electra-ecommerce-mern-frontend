@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
 import Header from "../components/Header";
@@ -8,6 +8,7 @@ import { addToCart } from "../services/cartService";
 
 function ProductDetails() {
   const { productId } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
@@ -64,6 +65,27 @@ function ProductDetails() {
       setAddToCartLoading(false);
     }
   };
+
+  const handleBuyNow = async () => {
+      try {
+        setAddToCartLoading(true);
+
+        const response = await addToCart({
+          productId: product._id,
+          quantity: 1,
+        });
+
+        toast.success(response.message || "Product added to cart");
+
+        navigate("/checkout");
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Failed to process Buy Now"
+        );
+      } finally {
+        setAddToCartLoading(false);
+      }
+    };
 
   if (loading) {
     return (
@@ -235,10 +257,11 @@ function ProductDetails() {
                 </button>
 
                 <button
-                  className="flex-1 rounded-xl border border-[#2FA084] px-4 py-2.5 text-base font-semibold text-[#2FA084] transition hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
-                  disabled={product.stock === 0}
+                  onClick={handleBuyNow}
+                  className="flex-1 cursor-pointer rounded-xl border border-[#2FA084] px-4 py-2.5 text-base font-semibold text-[#2FA084] transition hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                  disabled={product.stock === 0 || addToCartLoading}
                 >
-                  Buy Now
+                  {addToCartLoading ? "Processing..." : "Buy Now"}
                 </button>
               </div>
 

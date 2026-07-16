@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -5,6 +6,8 @@ import Header from "../components/Header";
 import { getCart, updateCartItem, removeCartItem } from "../services/cartService";
 
 function Cart() {
+
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -334,11 +337,17 @@ function Cart() {
                 </div>
               </div>
 
-              <button className="mt-6 w-full rounded-xl bg-[#2FA084] px-4 py-3 text-center font-semibold text-white transition hover:bg-[#267d67] disabled:cursor-not-allowed disabled:bg-gray-400">
+              <Link
+                to="/checkout"
+                className="mt-6 block w-full rounded-xl bg-[#2FA084] px-4 py-3 text-center font-semibold text-white transition hover:bg-[#267d67]"
+              >
                 Proceed to Checkout
-              </button>
+              </Link>
 
-              <button className="mt-3 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-center font-semibold text-slate-900 transition hover:bg-slate-50">
+              <button
+                onClick={() => navigate("/products")}
+                className="mt-3 w-full cursor-pointer rounded-xl border border-slate-300 px-4 py-2.5 text-center font-semibold text-slate-900 transition hover:bg-slate-50"
+              >
                 Continue Shopping
               </button>
             </div>
