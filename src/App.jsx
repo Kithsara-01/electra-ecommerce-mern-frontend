@@ -11,6 +11,7 @@ import CustomerRegister from "./pages/CustomerRegister";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 
 import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -18,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
 
 import AdminProfile from "./pages/AdminProfile";
 import AdminEditProfile from "./pages/AdminEditProfile";
@@ -26,6 +28,7 @@ import AdminAddProduct from "./pages/AdminAddProduct";
 import AdminEditProduct from "./pages/AdminEditProduct";
 import AdminUsers from "./pages/AdminUsers";
 import AdminOrders from "./pages/AdminOrders";
+import AdminOrderDetails from "./pages/AdminOrderDetails";
 
 function App() {
   return (
@@ -73,6 +76,13 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute allowedRoles={["Customer"]}><Profile /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute allowedRoles={["Customer"]}><EditProfile /></ProtectedRoute>} />
         <Route path="/my-orders" element={<ProtectedRoute allowedRoles={["Customer"]}><MyOrders /></ProtectedRoute>} />
+        <Route path="/my-orders/:orderId" element={<ProtectedRoute allowedRoles={["Customer"]}><OrderDetails /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute allowedRoles={["Customer"]}>
+      <Checkout />
+      
+    </ProtectedRoute>
+  }
+/>
 
         {/* Supplier */}
         <Route path="/supplier-dashboard" element={<ProtectedRoute allowedRoles={["Supplier"]}><SupplierDashboard /></ProtectedRoute>} />
@@ -86,6 +96,7 @@ function App() {
         <Route path="/admin/products/edit/:productId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProduct /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminUsers /></ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrders /></ProtectedRoute>} />
+        <Route path="/admin/orders/:orderId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrderDetails /></ProtectedRoute>} />
 
       </Routes>
     </>
