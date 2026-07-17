@@ -3,12 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/electra-logo.png";
 import AdminProfileDropdown from "./AdminProfileDropdown";
 
-import {
-  FaTachometerAlt,
-  FaBoxOpen,
-  FaUsers,
-  FaShoppingCart,
-} from "react-icons/fa";
+import { FaTachometerAlt, FaBoxOpen, FaUsers, FaShoppingCart, FaBoxes} from "react-icons/fa";
 
 function AdminLayout({ title = "Admin Dashboard", children }) {
 
@@ -84,6 +79,19 @@ function AdminLayout({ title = "Admin Dashboard", children }) {
             
             <FaShoppingCart />
             Orders
+          </Link>
+
+          {/* Stock Management */}
+          <Link
+            to="/admin/stocks"
+            className={`mt-2 flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              location.pathname === "/admin/stocks"
+                ? "bg-primary text-accent font-semibold"
+                : "text-secondary hover:bg-primary"
+            }`}
+          >
+            <FaBoxes />
+            Stock Management
           </Link>
         </nav>
       </aside>

@@ -63,10 +63,10 @@ function Cart() {
         productId: itemId,
         quantity: newQuantity,
       });
-      
+
       // Reload cart with updated data
       await fetchCart(false);
-    
+
       // No success toast for quantity updates
     } catch (error) {
       toast.error(
@@ -79,30 +79,30 @@ function Cart() {
 
   const handleRemoveItem = async (itemId) => {
     try {
-        setRemovingItemId(itemId);
+      setRemovingItemId(itemId);
 
-        const response = await removeCartItem(itemId);
+      const response = await removeCartItem(itemId);
 
-        await fetchCart(false);
+      await fetchCart(false);
 
-        toast.success(response.message || "Item removed from cart");
+      toast.success(response.message || "Item removed from cart");
     } catch (error) {
-        toast.error(
+      toast.error(
         error.response?.data?.message || "Failed to remove item from cart"
-        );
+      );
     } finally {
-        setRemovingItemId(null);
+      setRemovingItemId(null);
     }
-    };
+  };
 
   const calculateSubtotal = (price, quantity) => price * quantity;
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const grandTotal = cartItems.reduce(
-        (sum, item) =>
-            sum + calculateSubtotal(item.productId.price, item.quantity),
-        0
-        );
+    (sum, item) => sum + calculateSubtotal(item.productId.price, item.quantity),
+    0
+  );
+
   if (loading) {
     return (
       <>
@@ -162,12 +162,33 @@ function Cart() {
     <>
       <Header />
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Shopping Cart
-        </h1>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
+          <div>
+
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">
+              Shopping Cart
+            </p>
+
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Review Your Cart
+            </h1>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Review your selected products before proceeding to checkout.
+            </p>
+
+          </div>
+
+          <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+            {totalItems} {totalItems === 1 ? "Item" : "Items"}
+          </div>
+
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Cart Items Section */}
           <div className="lg:col-span-2">
             <div className="space-y-4">
@@ -178,7 +199,7 @@ function Cart() {
                 return (
                   <div
                     key={item.productId._id}
-                    className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:shadow-md sm:p-6"
+                    className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-accent/20 hover:shadow-md sm:flex-row sm:items-center"
                   >
                     {/* Product Image */}
                     <div className="flex-shrink-0">
@@ -192,28 +213,38 @@ function Cart() {
                     </div>
 
                     {/* Product Details */}
-                    <div className="flex flex-1 flex-col justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-slate-900 sm:text-xl">
-                          {item.productId.name}
-                        </h3>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Brand: {item.productId.brand || "N/A"}
-                        </p>
-                      </div>
+                    <div className="min-w-0 flex-1">
 
-                      {/* Price and Quantity */}
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <h3 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">
+                        {item.productId.name}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-slate-500">
+                        {item.productId.brand || "Electra"}
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap items-center gap-6">
+
+                        {/* Unit Price */}
                         <div>
-                          <p className="text-sm text-slate-600">Unit Price</p>
-                          <p className="font-semibold text-[#2FA084]">
+                          <p className="text-xs uppercase tracking-wide text-slate-400">
+                            Unit Price
+                          </p>
+
+                          <p className="font-semibold text-slate-900">
                             {formatPrice(item.productId.price)}
                           </p>
                         </div>
 
+                        {/* Quantity */}
                         <div>
-                          <p className="text-sm text-slate-600 mb-2">Quantity</p>
-                          <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-2 py-1">
+
+                          <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+                            Quantity
+                          </p>
+
+                          <div className="flex items-center rounded-full border border-slate-200 bg-slate-50">
+
                             <button
                               onClick={() =>
                                 handleQuantityChange(
@@ -226,7 +257,7 @@ function Cart() {
                                 updatingItemId === item.productId._id ||
                                 item.quantity === 1
                               }
-                              className="flex h-7 w-7 items-center justify-center rounded transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-50"
+                              className="flex h-9 w-9 items-center justify-center rounded-l-full transition hover:bg-slate-200 disabled:opacity-40"
                               title="Decrease quantity"
                             >
                               <svg
@@ -242,7 +273,7 @@ function Cart() {
                               </svg>
                             </button>
 
-                            <span className="w-8 text-center font-semibold text-slate-900">
+                            <span className="w-10 text-center font-semibold">
                               {item.quantity}
                             </span>
 
@@ -254,10 +285,8 @@ function Cart() {
                                   item.quantity + 1
                                 )
                               }
-                              disabled={
-                                updatingItemId === item.productId._id
-                              }
-                              className="flex h-7 w-7 items-center justify-center rounded transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-50"
+                              disabled={updatingItemId === item.productId._id}
+                              className="flex h-9 w-9 items-center justify-center rounded-r-full transition hover:bg-slate-200 disabled:opacity-40"
                               title="Increase quantity"
                             >
                               <svg
@@ -272,29 +301,38 @@ function Cart() {
                                 />
                               </svg>
                             </button>
+
                           </div>
+
                         </div>
 
+                        {/* Subtotal */}
                         <div>
-                          <p className="text-sm text-slate-600">Subtotal</p>
-                          <p className="text-lg font-bold text-[#2FA084]">
+
+                          <p className="text-xs uppercase tracking-wide text-slate-400">
+                            Subtotal
+                          </p>
+
+                          <p className="text-lg font-bold text-accent">
                             {formatPrice(subtotal)}
                           </p>
+
                         </div>
+
                       </div>
+
                     </div>
 
-                    {/* Remove Button */}
-                    <div className="flex flex-shrink-0 items-start">
+                    {/* Remove */}
+                    <div className="flex flex-shrink-0 items-start justify-end">
                       <button
                         onClick={() => handleRemoveItem(item.productId._id)}
-                        
                         disabled={removingItemId === item.productId._id}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                        title="Remove from cart"
+                        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-all hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="Remove Item"
                       >
                         <svg
-                          className="h-5 w-5 text-slate-500 transition group-hover:text-red-600"
+                          className="h-5 w-5"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -306,6 +344,7 @@ function Cart() {
                         </svg>
                       </button>
                     </div>
+
                   </div>
                 );
               })}
@@ -314,42 +353,80 @@ function Cart() {
 
           {/* Cart Summary Section */}
           <div className="lg:col-span-1">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-6">
-              <h2 className="text-lg font-semibold text-slate-900">
+            <div className="sticky top-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+              <h2 className="text-xl font-semibold text-slate-900">
                 Order Summary
               </h2>
 
+              <p className="mt-1 text-sm text-slate-500">
+                Review your order before checkout.
+              </p>
+
               <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
-                <div className="flex justify-between">
-                  <p className="text-slate-600">Total Items</p>
-                  <p className="font-semibold text-slate-900">{totalItems}</p>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">
+                    Total Items
+                  </span>
+
+                  <span className="font-semibold text-slate-900">
+                    {totalItems}
+                  </span>
                 </div>
 
-                <div className="border-t border-slate-200 pt-4">
-                  <div className="flex justify-between">
-                    <p className="text-lg font-semibold text-slate-900">
-                      Grand Total
-                    </p>
-                    <p className="text-2xl font-bold text-[#2FA084]">
-                      {formatPrice(grandTotal)}
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">
+                    Delivery Fee
+                  </span>
+
+                  <span className="font-medium text-slate-500">
+                    Calculated at Checkout
+                  </span>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">
+                    Discount
+                  </span>
+
+                  <span className="font-medium text-slate-500">
+                    LKR 0
+                  </span>
+                </div>
+
+                <div className="border-t border-dashed border-slate-200 pt-5">
+
+                  <div className="flex items-center justify-between">
+
+                    <span className="text-lg font-semibold text-slate-900">
+                      Grand Total
+                    </span>
+
+                    <span className="text-2xl font-bold text-accent">
+                      {formatPrice(grandTotal)}
+                    </span>
+
+                  </div>
+
+                </div>
+
               </div>
 
               <Link
                 to="/checkout"
-                className="mt-6 block w-full rounded-xl bg-[#2FA084] px-4 py-3 text-center font-semibold text-white transition hover:bg-[#267d67]"
+                className="mt-7 block w-full rounded-xl bg-accent px-4 py-3.5 text-center font-semibold text-white transition hover:opacity-90"
               >
                 Proceed to Checkout
               </Link>
 
               <button
                 onClick={() => navigate("/products")}
-                className="mt-3 w-full cursor-pointer rounded-xl border border-slate-300 px-4 py-2.5 text-center font-semibold text-slate-900 transition hover:bg-slate-50"
+                className="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
               >
                 Continue Shopping
               </button>
+
             </div>
           </div>
         </div>

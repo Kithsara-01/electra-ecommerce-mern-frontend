@@ -61,6 +61,18 @@ export const updateProduct = async (productId, productData) => {
   return response.data;
 };
 
+
+// ===============================
+// Update Product Stock
+// ===============================
+export const updateProductStock = async (productId, stock) => {
+  const response = await API.patch(`/products/${productId}/stock`, {
+    stock,
+  });
+
+  return response.data;
+};
+
 // ===============================
 // Toggle Product Availability
 // ===============================

@@ -6,6 +6,7 @@ import "sweetalert2/dist/sweetalert2.css";
 
 import AdminLayout from "../components/AdminLayout";
 import { getAllOrders, updateOrderStatus } from "../services/orderService";
+import { FaSearch } from "react-icons/fa";
 
 function AdminOrders() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function AdminOrders() {
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchOrders();
@@ -103,6 +105,7 @@ function AdminOrders() {
     });
   };
 
+  
   const FILTERS = [
       "All",
       "Pending",
@@ -112,10 +115,28 @@ function AdminOrders() {
       "Cancelled",
     ];
 
-    const filteredOrders =
-      selectedFilter === "All"
-        ? orders
-        : orders.filter((order) => order.orderStatus === selectedFilter);
+    const filteredOrders = orders.filter((order) => {
+      const matchesStatus =
+        selectedFilter === "All" ||
+        order.orderStatus === selectedFilter;
+
+      const keyword = searchTerm
+          .trim()
+          .replace(/^#/, "")
+          .toLowerCase();
+
+      const orderIdSource =
+          order.orderId || order.orderNumber || order.invoiceNumber || order._id || "";
+        const shortOrderId = String(orderIdSource).slice(-8).toLowerCase();
+
+        const matchesSearch =
+          order.customerName?.toLowerCase().includes(keyword) ||
+          order.email?.toLowerCase().includes(keyword) ||
+          order.phone?.toLowerCase().includes(keyword) ||
+          shortOrderId.includes(keyword);
+
+        return matchesStatus && matchesSearch;
+    });
 
     const getStatusCount = (status) => {
       if (status === "All") return orders.length;
@@ -171,6 +192,7 @@ function AdminOrders() {
     <AdminLayout title="Admin Orders">
       <div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-6">
         <div className="mb-4 flex items-center justify-between">
+          
           <div>
             <h2 className="text-2xl font-semibold text-secondary">Order Management</h2>
             <p className="mt-1 text-sm text-slate-600">Track and update customer orders in real time.</p>
@@ -179,6 +201,21 @@ function AdminOrders() {
             {orders.length} orders
           </span>
         </div>
+        <div className="relative mb-5">
+
+          <FaSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+
+          <input
+            type="text"
+            placeholder="Search by customer, email, phone or order ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+          />
+
+        </div>
+
+
 
         <div className="mb-6 flex flex-wrap gap-3">
             {FILTERS.map((status) => (
@@ -238,8 +275,17 @@ function AdminOrders() {
                           }
                         }}
                         disabled={updatingId === order._id}
-                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
+                      className={`rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
+                      currentStatus === "Pending"
+                        ? "border-amber-300 bg-amber-50 text-amber-700 focus:border-amber-400 focus:ring-amber-200"
+                        : currentStatus === "Processing"
+                          ? "border-blue-300 bg-blue-50 text-blue-700 focus:border-blue-400 focus:ring-blue-200"
+                          : currentStatus === "Shipped"
+                            ? "border-indigo-300 bg-indigo-50 text-indigo-700 focus:border-indigo-400 focus:ring-indigo-200"
+                            : currentStatus === "Delivered"
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:border-emerald-400 focus:ring-emerald-200"
+                              : "border-rose-300 bg-rose-50 text-rose-700 focus:border-rose-400 focus:ring-rose-200"
+                    }`}                      >
                         {allowedStatuses.map((status) => (
                           <option key={status} value={status}>
                             {status}

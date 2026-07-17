@@ -6,7 +6,13 @@ import {
   FaTruck,
 } from "react-icons/fa6";
 
-const STATUS_FLOW = ["Pending", "Processing", "Shipped", "Delivered"];
+const STATUS_FLOW = [
+  "Pending",
+  "Processing",
+  "Shipped",
+  "Delivered",
+];
+
 const STATUS_ICONS = {
   Pending: FaClipboardCheck,
   Processing: FaBoxOpen,
@@ -15,121 +21,147 @@ const STATUS_ICONS = {
   Cancelled: FaCircleXmark,
 };
 
-const getStatusIndex = (status) => {
-  if (!status) return -1;
-
-  const normalized = status.trim().toLowerCase();
-
-  if (normalized === "cancelled") {
-    return -2;
-  }
-
-  const index = STATUS_FLOW.findIndex((step) => step.toLowerCase() === normalized);
-  return index;
-};
-
 const getCancelledFlow = (status) => {
-  const normalized = (status || "").trim().toLowerCase();
+  const normalized = (status || "").toLowerCase();
 
-  if (normalized.includes("processing") && normalized.includes("cancel")) {
+  if (normalized.includes("processing")) {
     return ["Pending", "Processing", "Cancelled"];
   }
 
   return ["Pending", "Cancelled"];
 };
 
-function OrderStatusTracker({ currentStatus = "Pending" }) {
-  const normalizedStatus = (currentStatus || "Pending").trim();
-  const statusIndex = getStatusIndex(normalizedStatus);
-  const isCancelled = normalizedStatus.toLowerCase() === "cancelled" || normalizedStatus.toLowerCase().includes("cancelled");
+function OrderStatusTracker({
+  currentStatus = "Pending",
+}) {
+  const normalizedStatus = currentStatus.trim();
 
-  const flow = isCancelled ? getCancelledFlow(normalizedStatus) : STATUS_FLOW;
+  const isCancelled =
+    normalizedStatus.toLowerCase() === "cancelled";
 
-  const getStepState = (stepName, index) => {
+  const flow = isCancelled
+    ? getCancelledFlow(normalizedStatus)
+    : STATUS_FLOW;
+
+  const currentIndex = flow.findIndex(
+    (step) =>
+      step.toLowerCase() ===
+      normalizedStatus.toLowerCase()
+  );
+
+  const getStepState = (index) => {
     if (isCancelled) {
-      if (stepName === "Cancelled") {
-        return "current";
-      }
-
-      if (index < flow.indexOf("Cancelled")) {
-        return "completed";
-      }
-
-      return "upcoming";
-    }
-
-    if (statusIndex === -1) {
-      return index === 0 ? "current" : "upcoming";
-    }
-
-    if (index < statusIndex) {
-      return "completed";
-    }
-
-    if (index === statusIndex) {
+      if (index < flow.length - 1) return "completed";
       return "current";
     }
+
+    if (index < currentIndex) return "completed";
+
+    if (index === currentIndex) return "current";
 
     return "upcoming";
   };
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex min-w-[320px] items-center justify-between gap-2 sm:gap-3">
+  const getCircleClass = (state, step) => {
+    if (state === "completed") {
+      return "border-accent bg-accent text-white";
+    }
+
+    if (state === "current") {
+      if (step === "Cancelled") {
+        return "border-red-500 bg-red-500 text-white";
+      }
+
+      return "border-accent bg-white text-accent ring-4 ring-accent/15";
+    }
+
+    return "border-slate-300 bg-white text-slate-400";
+  };
+
+  const getTextClass = (state, step) => {
+    if (state === "completed") {
+      return "text-accent";
+    }
+
+    if (state === "current") {
+      if (step === "Cancelled") {
+        return "text-red-600";
+      }
+
+      return "text-secondary";
+    }
+
+    return "text-slate-500";
+  };
+
+  const getLineClass = (index) => {
+    if (isCancelled) {
+      return index < flow.length - 2
+        ? "bg-accent"
+        : "bg-slate-200";
+    }
+
+    return index < currentIndex
+      ? "bg-accent"
+      : "bg-slate-200";
+  };
+    return (
+    <div className="w-full overflow-x-auto py-2">
+      <div className="mx-auto flex min-w-[520px] items-start justify-between">
+
         {flow.map((step, index) => {
-          const state = getStepState(step, index);
-          const isLast = index === flow.length - 1;
-          const isCompleted = state === "completed";
-          const isCurrent = state === "current";
-          const isUpcoming = state === "upcoming";
+          const state = getStepState(index);
           const Icon = STATUS_ICONS[step] || FaClipboardCheck;
+          const isLast = index === flow.length - 1;
 
           return (
-            <div key={step} className="flex flex-1 items-center">
-              <div className="flex min-w-0 flex-1 flex-col items-center text-center">
+            <div
+              key={step}
+              className="flex flex-1 items-center"
+            >
+
+              {/* Step */}
+
+              <div className="flex flex-col items-center">
+
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 ease-out ${
-                    isCompleted
-                      ? "border-accent bg-accent text-white shadow-sm"
-                      : isCurrent && isCancelled
-                        ? "scale-105 border-rose-500 bg-white text-rose-500 shadow-sm"
-                        : isCurrent
-                          ? "scale-105 border-accent bg-white text-accent shadow-sm"
-                          : "border-slate-300 bg-white text-slate-400"
-                  }`}
+                  className={`flex h-14 w-14 items-center justify-center rounded-full border-2 shadow-sm transition-all duration-300 ${getCircleClass(
+                    state,
+                    step
+                  )}`}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="text-lg" />
                 </div>
 
-                <span
-                  className={`mt-2 text-sm font-semibold transition-colors duration-300 ${
-                    isCompleted || (isCurrent && !isCancelled)
-                      ? "text-accent"
-                      : isCancelled && step === "Cancelled"
-                        ? "text-rose-600"
-                        : isUpcoming
-                          ? "text-slate-500"
-                          : "text-accent"
-                  }`}
+                <p
+                  className={`mt-3 text-sm font-semibold ${getTextClass(
+                    state,
+                    step
+                  )}`}
                 >
                   {step}
-                </span>
+                </p>
+
               </div>
 
+              {/* Connector */}
+
               {!isLast && (
-                <div
-                  className={`mx-2 hidden h-0.5 flex-1 rounded-full transition-all duration-300 ease-out sm:block ${
-                    index < flow.indexOf("Cancelled") && isCancelled
-                      ? "bg-accent"
-                      : isCompleted || (isCurrent && !isCancelled)
-                        ? "bg-accent"
-                        : "bg-slate-200"
-                  }`}
-                />
+                <div className="flex-1 px-3 pt-7">
+
+                  <div
+                    className={`h-[3px] rounded-full transition-all duration-300 ${getLineClass(
+                      index
+                    )}`}
+                  />
+
+                </div>
               )}
+
             </div>
           );
         })}
+
       </div>
     </div>
   );

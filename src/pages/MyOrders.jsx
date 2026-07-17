@@ -5,6 +5,8 @@ import "sweetalert2/dist/sweetalert2.css";
 
 import Header from "../components/Header";
 import { getMyOrders, cancelOrder } from "../services/orderService";
+import { FaFileInvoice, FaDownload } from "react-icons/fa6";
+import { downloadInvoice } from "../utils/invoiceGenerator";
 
 function MyOrders() {
   const navigate = useNavigate();
@@ -219,9 +221,9 @@ function MyOrders() {
               Order History
             </h1>
           </div>
-          <p className="text-sm text-slate-600">
-            {sortedOrders.length} {sortedOrders.length === 1 ? "order" : "orders"} found
-          </p>
+            <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+              {sortedOrders.length} {sortedOrders.length === 1 ? "Order" : "Orders"}
+            </div>
         </div>
 
         <div className="space-y-6">
@@ -232,100 +234,154 @@ function MyOrders() {
             return (
               <div
                 key={order._id}
-                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:shadow-md sm:p-6"
-              >
-                <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500">Order ID</p>
-                    <p className="mt-1 font-semibold text-slate-900">#{order._id?.slice(-8).toUpperCase()}</p>
-                  </div>
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"              >
+                <div className="flex flex-col gap-5 border-b border-slate-200 pb-5 lg:flex-row lg:items-center lg:justify-between">
 
-                  <div className="flex flex-wrap gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-500">Status</p>
-                      <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-sm font-medium ${statusClass}`}>
+                  {/* Left */}
+                  <div className="space-y-3">
+
+                    <div className="flex flex-wrap items-center gap-3">
+
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        #{order._id.slice(-8).toUpperCase()}
+                      </h3>
+
+                      <span
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
+                      >
                         {orderStatus}
                       </span>
+
                     </div>
+
+                    <div className="flex flex-wrap items-center gap-5 text-sm text-slate-500">
+
+                      <div>
+                        <span className="font-medium text-slate-600">
+                          Order Date :
+                        </span>{" "}
+                        {formatDate(order.createdAt)}
+                      </div>
+
+                      <div>
+                        <span className="font-medium text-slate-600">
+                          Payment :
+                        </span>{" "}
+                        {order.paymentMethod}
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* Right */}
+                  <div className="flex flex-wrap items-center gap-2">
+
                     <button
                       onClick={() => navigate(`/my-orders/${order._id}`)}
-                      className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-accent hover:text-accent"
                     >
                       View Details
                     </button>
-                    <div>
-                      <p className="text-sm font-medium text-slate-500">Order Date</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">
-                        {formatDate(order.createdAt)}
-                      </p>
-                    </div>
-                    {(orderStatus === "Pending" || orderStatus === "Processing") && (
+
+                    {orderStatus === "Delivered" && (
+                      <button
+                        onClick={() => downloadInvoice(order)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                      >
+                        <FaDownload className="text-xs" />
+                        Download Invoice
+                      </button>
+                    )}
+
+                    {(orderStatus === "Pending" ||
+                      orderStatus === "Processing") && (
                       <button
                         onClick={() => handleCancelOrder(order._id)}
                         disabled={cancellingOrderId === order._id}
-                        className="inline-flex items-center justify-center rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-600 disabled:bg-rose-300"
+                        className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:bg-rose-300"
                       >
-                        {cancellingOrderId === order._id ? (
-                          <>
-                            <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            Cancelling...
-                          </>
-                        ) : (
-                          "Cancel Order"
-                        )}
+                        {cancellingOrderId === order._id
+                          ? "Cancelling..."
+                          : "Cancel"}
                       </button>
                     )}
+
                   </div>
+
                 </div>
 
-                <div className="mt-5 grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
+                <div className="mt-5 space-y-5">
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm font-medium text-slate-500">Delivery Address</p>
                       <p className="mt-1 text-sm text-slate-700">{order.deliveryAddress || "No address provided"}</p>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="divide-y divide-slate-200">
+
                       {order.items?.map((item, index) => (
+
                         <div
                           key={`${order._id}-${index}`}
-                          className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center"
+                          className="flex items-center gap-4 py-4"
                         >
-                          <div className="h-20 w-20 overflow-hidden rounded-xl bg-white">
-                            <img
-                              src={item.image || "https://placehold.co/96x96/E6F6F1/2FA084?text=Product"}
-                              alt={item.name}
-                              className="h-full w-full object-cover"
-                            />
+
+                          <img
+                            src={
+                              item.image ||
+                              "https://placehold.co/80x80/E6F6F1/2FA084?text=Product"
+                            }
+                            alt={item.name}
+                            className="h-16 w-16 rounded-xl border border-slate-200 object-cover"
+                          />
+
+                          <div className="min-w-0 flex-1">
+
+                            <h3 className="truncate text-base font-semibold text-slate-900">
+                              {item.name}
+                            </h3>
+
+                            <div className="mt-1 flex flex-wrap gap-4 text-sm text-slate-500">
+
+                              <span>
+                                Qty <strong>{item.quantity}</strong>
+                              </span>
+
+                              <span>
+                                {formatPrice(item.price)}
+                              </span>
+
+                            </div>
+
                           </div>
 
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-slate-900">{item.name}</h3>
-                            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-slate-600">
-                              <span>Qty: {item.quantity}</span>
-                              <span>Price: {formatPrice(item.price)}</span>
-                            </div>
+                          <div className="text-right">
+
+                            <p className="text-sm text-slate-500">
+                              Total
+                            </p>
+
+                            <p className="font-semibold text-accent">
+                              {formatPrice(item.price * item.quantity)}
+                            </p>
+
                           </div>
+
                         </div>
+
                       ))}
+
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm font-medium text-slate-500">Total Amount</p>
-                    <p className="mt-2 text-2xl font-semibold text-accent">
-                      {formatPrice(order.totalAmount)}
-                    </p>
-                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+      
     </>
   );
 }

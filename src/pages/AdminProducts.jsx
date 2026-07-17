@@ -133,6 +133,27 @@ function AdminProducts() {
         }
       };
 
+      const getStockStatus = (stock) => {
+        if (stock === 0) {
+          return {
+            label: "Out of Stock",
+            className: "bg-red-100 text-red-700",
+          };
+        }
+
+        if (stock <= 5) {
+          return {
+            label: "Low Stock",
+            className: "bg-yellow-100 text-yellow-700",
+          };
+        }
+
+        return {
+          label: "In Stock",
+          className: "bg-green-100 text-green-700",
+        };
+      };
+
 
 
   return (
@@ -375,7 +396,19 @@ function AdminProducts() {
                     </td>
 
                     <td className="px-6 py-4">
-                      {product.stock}
+                      <div className="flex flex-col gap-2">
+                        <span className="font-semibold text-secondary">
+                          {product.stock} Units
+                        </span>
+
+                        <span
+                          className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+                            getStockStatus(product.stock).className
+                          }`}
+                        >
+                          {getStockStatus(product.stock).label}
+                        </span>
+                      </div>
                     </td>
 
                     <td className="px-6 py-4">
