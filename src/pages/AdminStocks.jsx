@@ -12,29 +12,63 @@ function AdminStocks() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("All");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [outOfStockCount, setOutOfStockCount] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchTerm);
+    setCurrentPage(1);
+  }, 500);
 
-  const fetchProducts = async () => {
-    try {
+  return () => clearTimeout(timer);
+}, [searchTerm]);
+
+useEffect(() => {
+  fetchProducts(currentPage);
+}, [currentPage, debouncedSearch, filter]);
+
+const fetchProducts = async (page = 1) => {
+  try {
+    if (initialLoad) {
       setLoading(true);
-
-      const response = await getAllAdminProducts({
-        limit: 1000,
-      });
-
-      setProducts(response.products || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    } else {
+      setIsSearching(true);
     }
-  };
+
+    const response = await getAllAdminProducts({
+      page,
+      limit: 10,
+      search: debouncedSearch,
+      stockStatus: filter,
+    });
+
+    console.log("Admin Products Response:", response);
+
+    setProducts(response.products || []);
+    setCurrentPage(response.currentPage || 1);
+    setTotalPages(response.totalPages || 1);
+    setTotalProducts(response.totalProducts || 0);
+    setLowStockCount(response.lowStockCount || 0);
+    setOutOfStockCount(response.outOfStockCount || 0);
+    setInitialLoad(false);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+    setIsSearching(false);
+  }
+};
 
   const getStockStatus = (stock) => {
     if (stock === 0) return "Out of Stock";
@@ -62,28 +96,8 @@ function AdminStocks() {
     });
   };
 
-  const lowStockCount = products.filter(
-    (product) => product.stock > 0 && product.stock <= 5
-  ).length;
-
-  const filteredProducts = products.filter((product) => {
-    const keyword = searchTerm.toLowerCase();
-
-    const matchesSearch =
-      product.name?.toLowerCase().includes(keyword) ||
-      product.productId?.toLowerCase().includes(keyword) ||
-      product.category?.toLowerCase().includes(keyword) ||
-      product.brand?.toLowerCase().includes(keyword) ||
-      product.model?.toLowerCase().includes(keyword);
-
-    if (!matchesSearch) return false;
-
-    const status = getStockStatus(product.stock);
-
-    if (filter === "All") return true;
-
-    return status === filter;
-  });
+  
+ 
 
   const openStockModal = (product) => {
     setSelectedProduct(product);
@@ -112,7 +126,7 @@ function AdminStocks() {
         });
 
         closeStockModal();
-        await fetchProducts();
+        await fetchProducts(currentPage);
     } catch (error) {
         await Swal.fire({
         icon: "error",
@@ -158,7 +172,7 @@ function AdminStocks() {
           </div>
 
           <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
-            {products.length} Products
+            {totalProducts} Products
           </span>
 
         </div>
@@ -189,7 +203,10 @@ function AdminStocks() {
 
               <button
                 key={item}
-                onClick={() => setFilter(item)}
+                onClick={() => {
+                    setFilter(item);
+                    setCurrentPage(1);
+                  }}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition
                 ${
                   filter === item
@@ -237,7 +254,7 @@ function AdminStocks() {
 
               <tbody className="divide-y divide-slate-200">
 
-                {filteredProducts.length === 0 ? (
+                {products.length === 0 ? (
 
                   <tr>
 
@@ -252,7 +269,7 @@ function AdminStocks() {
 
                 ) : (
 
-                  filteredProducts.map((product) => {
+                  products.map((product) => {
                     const status = getStockStatus(product.stock);
 
                     return (
@@ -343,6 +360,43 @@ function AdminStocks() {
         </div>
 
       </div>
+
+      <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-4 sm:flex-row">
+        <p className="text-sm text-slate-600">
+          Page <span className="font-semibold">{currentPage}</span> of{" "}
+          <span className="font-semibold">{totalPages}</span>
+        </p>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPage((page) => page - 1)}
+            disabled={currentPage === 1 || isSearching}
+            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+              currentPage === 1 || isSearching
+                ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+                : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+            }`}
+          >
+            Previous
+          </button>
+
+          <button
+            onClick={() => setCurrentPage((page) => page + 1)}
+            disabled={currentPage === totalPages || isSearching}
+           className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+            currentPage === totalPages || isSearching
+              ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+              : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+          }`}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+
+
+
       <UpdateStockModal
         isOpen={isModalOpen}
         onClose={closeStockModal}

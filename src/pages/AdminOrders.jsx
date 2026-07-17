@@ -12,29 +12,59 @@ function AdminOrders() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
-  const fetchOrders = async () => {
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setDebouncedSearch(searchTerm);
+          setCurrentPage(1);
+        }, 500);
+
+      return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+
+    useEffect(() => {
+        fetchOrders(currentPage);
+      }, [currentPage, debouncedSearch, selectedFilter]);
+
+  const fetchOrders = async (page = 1) => {
     try {
-      setLoading(true);
+      if (initialLoad) {
+        setLoading(true);
+      } else {
+        setIsSearching(true);
+      }
       setError("");
-      const response = await getAllOrders();
-      setOrders(response.orders || []);
-    } catch (err) {
+      const response = await getAllOrders(
+        page,
+        10,
+        debouncedSearch,
+        selectedFilter
+      );
+          setOrders(response.orders || []);
+          setInitialLoad(false);
+          setTotalPages(response.totalPages);
+          setTotalOrders(response.totalOrders);
+        } catch (err) {
       const message = err.response?.data?.message || "Failed to load orders";
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+          setError(message);
+          toast.error(message);
+        } finally {
+        setLoading(false);
+        setIsSearching(false);
+      }
+    };
 
   const statusTransitionMap = {
     Pending: ["Pending", "Processing", "Cancelled"],
@@ -77,7 +107,7 @@ function AdminOrders() {
     try {
       setUpdatingId(orderId);
       await updateOrderStatus(orderId, status);
-      await fetchOrders();
+      await fetchOrders(currentPage);
       toast.success("Order status updated successfully");
       return true;
     } catch (err) {
@@ -115,28 +145,7 @@ function AdminOrders() {
       "Cancelled",
     ];
 
-    const filteredOrders = orders.filter((order) => {
-      const matchesStatus =
-        selectedFilter === "All" ||
-        order.orderStatus === selectedFilter;
-
-      const keyword = searchTerm
-          .trim()
-          .replace(/^#/, "")
-          .toLowerCase();
-
-      const orderIdSource =
-          order.orderId || order.orderNumber || order.invoiceNumber || order._id || "";
-        const shortOrderId = String(orderIdSource).slice(-8).toLowerCase();
-
-        const matchesSearch =
-          order.customerName?.toLowerCase().includes(keyword) ||
-          order.email?.toLowerCase().includes(keyword) ||
-          order.phone?.toLowerCase().includes(keyword) ||
-          shortOrderId.includes(keyword);
-
-        return matchesStatus && matchesSearch;
-    });
+    
 
     const getStatusCount = (status) => {
       if (status === "All") return orders.length;
@@ -172,21 +181,7 @@ function AdminOrders() {
     );
   }
 
-    if (orders.length === 0) {
-    return (
-      <AdminLayout title="Admin Orders">
-        <div className="rounded-2xl border border-border bg-white p-10 text-center shadow-sm">
-          <h2 className="text-2xl font-semibold text-secondary">
-            No Orders Found
-          </h2>
-
-          <p className="mt-2 text-slate-600">
-            Customer orders will appear here.
-          </p>
-        </div>
-      </AdminLayout>
-    );
-  }
+  
 
   return (
     <AdminLayout title="Admin Orders">
@@ -198,7 +193,7 @@ function AdminOrders() {
             <p className="mt-1 text-sm text-slate-600">Track and update customer orders in real time.</p>
           </div>
           <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
-            {orders.length} orders
+            {totalOrders} orders
           </span>
         </div>
         <div className="relative mb-5">
@@ -247,8 +242,9 @@ function AdminOrders() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
-              {filteredOrders.map((order) => {
+          <tbody className="divide-y divide-slate-200 bg-white">
+            {orders.length > 0 ? (
+              orders.map((order) => {
                 const currentStatus = order.orderStatus || "Pending";
                 const allowedStatuses = getAllowedStatuses(currentStatus);
 
@@ -257,35 +253,52 @@ function AdminOrders() {
                     <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-slate-900">
                       #{order._id?.slice(-8).toUpperCase()}
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{order.customerName || "N/A"}</td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{order.email || "N/A"}</td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{order.phone || "N/A"}</td>
+
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {order.customerName || "N/A"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {order.email || "N/A"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {order.phone || "N/A"}
+                    </td>
+
                     <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-accent">
                       {formatPrice(order.grandTotal || order.totalAmount)}
                     </td>
+
                     <td className="px-4 py-4 text-sm text-slate-700">
                       <select
                         value={currentStatus}
                         onChange={async (e) => {
                           if (e.target.value !== currentStatus) {
-                            const confirmed = await handleStatusChange(order._id, e.target.value, currentStatus);
+                            const confirmed = await handleStatusChange(
+                              order._id,
+                              e.target.value,
+                              currentStatus
+                            );
+
                             if (!confirmed) {
                               e.target.value = currentStatus;
                             }
                           }
                         }}
                         disabled={updatingId === order._id}
-                      className={`rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
-                      currentStatus === "Pending"
-                        ? "border-amber-300 bg-amber-50 text-amber-700 focus:border-amber-400 focus:ring-amber-200"
-                        : currentStatus === "Processing"
-                          ? "border-blue-300 bg-blue-50 text-blue-700 focus:border-blue-400 focus:ring-blue-200"
-                          : currentStatus === "Shipped"
+                        className={`rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
+                          currentStatus === "Pending"
+                            ? "border-amber-300 bg-amber-50 text-amber-700 focus:border-amber-400 focus:ring-amber-200"
+                            : currentStatus === "Processing"
+                            ? "border-blue-300 bg-blue-50 text-blue-700 focus:border-blue-400 focus:ring-blue-200"
+                            : currentStatus === "Shipped"
                             ? "border-indigo-300 bg-indigo-50 text-indigo-700 focus:border-indigo-400 focus:ring-indigo-200"
                             : currentStatus === "Delivered"
-                              ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:border-emerald-400 focus:ring-emerald-200"
-                              : "border-rose-300 bg-rose-50 text-rose-700 focus:border-rose-400 focus:ring-rose-200"
-                    }`}                      >
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:border-emerald-400 focus:ring-emerald-200"
+                            : "border-rose-300 bg-rose-50 text-rose-700 focus:border-rose-400 focus:ring-rose-200"
+                        }`}
+                      >
                         {allowedStatuses.map((status) => (
                           <option key={status} value={status}>
                             {status}
@@ -293,9 +306,11 @@ function AdminOrders() {
                         ))}
                       </select>
                     </td>
+
                     <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
                       {formatDate(order.createdAt)}
                     </td>
+
                     <td className="px-4 py-4 text-sm text-slate-700">
                       <button
                         onClick={() => navigate(`/admin/orders/${order._id}`)}
@@ -306,9 +321,43 @@ function AdminOrders() {
                     </td>
                   </tr>
                 );
-              })}
-            </tbody>
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan={8}
+                  className="px-4 py-10 text-center text-slate-500"
+                >
+                  No matching orders found.
+                </td>
+              </tr>
+            )}
+          </tbody>
           </table>
+        </div>
+        <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+          <p className="text-sm text-slate-600">
+            Page <span className="font-semibold">{currentPage}</span> of{" "}
+            <span className="font-semibold">{totalPages}</span>
+          </p>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-secondary transition hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <button
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={currentPage === totalPages}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </AdminLayout>
