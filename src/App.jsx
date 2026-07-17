@@ -29,6 +29,7 @@ import AdminEditProduct from "./pages/AdminEditProduct";
 import AdminUsers from "./pages/AdminUsers";
 import AdminOrders from "./pages/AdminOrders";
 import AdminOrderDetails from "./pages/AdminOrderDetails";
+import AdminStocks from "./pages/AdminStocks";
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
 
         {/* Admin */}
         <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/stocks" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminStocks /></ProtectedRoute>} />
         <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProfile /></ProtectedRoute>} />
         <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProfile /></ProtectedRoute>} />
         <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProducts /></ProtectedRoute>} />

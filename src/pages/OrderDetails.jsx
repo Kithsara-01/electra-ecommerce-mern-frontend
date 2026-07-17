@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
   FaArrowLeft,
   FaBoxOpen,
@@ -14,11 +15,10 @@ import Header from "../components/Header";
 import OrderStatusTracker from "../components/OrderStatusTracker";
 import { getOrderById } from "../services/orderService";
 
-
 const currencyFormatter = new Intl.NumberFormat("en-LK", {
   style: "currency",
   currency: "LKR",
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 0,
 });
 
 const formatPrice = (value) => {
@@ -26,29 +26,36 @@ const formatPrice = (value) => {
     return currencyFormatter.format(value);
   }
 
-  return "N/A";
+  return "LKR 0";
 };
 
 const formatDate = (value) => {
-  if (!value) {
-    return "N/A";
-  }
+  if (!value) return "N/A";
 
-  return new Date(value).toLocaleDateString();
+  return new Date(value).toLocaleDateString("en-LK", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 };
 
 const getStatusStyles = (status = "") => {
   switch (status.toLowerCase()) {
     case "pending":
       return "bg-amber-100 text-amber-700";
+
     case "processing":
       return "bg-blue-100 text-blue-700";
+
     case "shipped":
       return "bg-purple-100 text-purple-700";
+
     case "delivered":
       return "bg-green-100 text-green-700";
+
     case "cancelled":
       return "bg-red-100 text-red-700";
+
     default:
       return "bg-slate-100 text-slate-700";
   }
@@ -57,336 +64,564 @@ const getStatusStyles = (status = "") => {
 function OrderDetails() {
   const navigate = useNavigate();
   const { orderId } = useParams();
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await getOrderById(orderId);
-        setOrder(response.order || null);
-      } catch (err) {
-        setError(err?.response?.data?.message || "Failed to load order.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (orderId) {
-      fetchOrder();
-    } else {
-      setError("Order ID is missing.");
-      setLoading(false);
-    }
+    loadOrder();
   }, [orderId]);
 
-  const items = Array.isArray(order?.items)
-    ? order.items
-    : Array.isArray(order?.products)
-      ? order.products
-      : [];
+  const loadOrder = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getOrderById(orderId);
+
+      setOrder(response.order);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          "Failed to load order details."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const items = order?.items || [];
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+
+        <div className="min-h-screen bg-primary flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold">
+              Loading Order...
+            </h2>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+
+        <div className="min-h-screen bg-primary flex items-center justify-center">
+          <div className="rounded-2xl bg-white p-8 shadow">
+            <h2 className="text-red-600 font-bold">
+              {error}
+            </h2>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-primary px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+
+      <div className="min-h-screen bg-primary py-10">
+
+        <div className="mx-auto max-w-7xl px-5">
+
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+            className="mb-8 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
           >
-            <FaArrowLeft className="text-xs" />
+            <FaArrowLeft />
             Back
           </button>
 
-          <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
             <div>
-              <p className="text-sm font-bold  text-accent">
+
+              <p className="text-sm font-semibold uppercase tracking-widest text-accent">
                 Order Details
               </p>
-              <h1 className="mt-2 text-3xl font-semibold text-secondary sm:text-4xl">
-                Your order at a Glance
+
+              <h1 className="mt-2 text-4xl font-bold text-secondary">
+                Order #{order._id.slice(-8).toUpperCase()}
               </h1>
+
+              <p className="mt-2 text-slate-500">
+                Review every detail about your purchase.
+              </p>
+
             </div>
-            <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
-              {loading ? "Loading order" : error ? "Needs attention" : `Order #${order?._id?.slice(-8).toUpperCase() || "N/A"}`}
+
+            <div className="flex items-center gap-3">
+
+              <span
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${getStatusStyles(
+                  order.orderStatus
+                )}`}
+              >
+                {order.orderStatus}
+              </span>
+
+              <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
+                {formatDate(order.createdAt)}
+              </span>
+
             </div>
+
           </div>
 
-          <div className="mt-8 overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-[0_24px_80px_-24px_rgba(15,23,42,0.24)]">
-            <div className="border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6 sm:p-8">
-              {loading && (
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-                  <p className="text-lg font-semibold text-secondary">Loading order...</p>
-                  <p className="mt-2 text-sm text-slate-500">Please wait while we retrieve your order details.</p>
-                </div>
-              )}
+          {/* Overview */}
 
-              {error && (
-                <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-700 shadow-sm">
-                  <p className="text-lg font-semibold">{error}</p>
-                </div>
-              )}
+          <section className="rounded-2xl border border-slate-200 bg-white p-8">
 
-              {!loading && !error && !order && (
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-                  <p className="text-lg font-semibold text-secondary">No order found.</p>
-                </div>
-              )}
+            <div className="flex items-center gap-3">
 
-              {!loading && !error && order && (
-                <div className="space-y-6">
-                  <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <div className="rounded-2xl bg-accent/10 p-2.5 text-accent">
-                            <FaReceipt className="text-lg" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold uppercase  text-black">
-                              Order overview
-                            </p>
-                            <h2 className="mt-1 text-xl font-semibold text-secondary">
-                              {order._id || "N/A"}
-                            </h2>
-                          </div>
-                        </div>
-                      </div>
+              <div className="rounded-xl bg-accent/10 p-3 text-accent">
+                <FaReceipt />
+              </div>
 
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-semibold ${getStatusStyles(order.orderStatus)}`}>
-                          {order.orderStatus || "Pending"}
-                        </span>
-                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm font-medium text-slate-600">
-                          {formatDate(order.createdAt)}
-                        </span>
-                      </div>
-                    </div>
+              <div>
 
-                    <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm text-slate-500">Order ID</p>
-                        <p className="mt-2 font-semibold text-secondary">{order._id || "N/A"}</p>
-                      </div>
+                <h2 className="text-xl font-semibold text-secondary">
+                  Order Overview
+                </h2>
 
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm text-slate-500">Order Date</p>
-                        <p className="mt-2 font-semibold text-secondary">{formatDate(order.createdAt)}</p>
-                      </div>
+                <p className="text-sm text-slate-500">
+                  Basic information about this order
+                </p>
 
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm text-slate-500">Status</p>
-                        <p className="mt-2 font-semibold text-secondary">{order.orderStatus || "Pending"}</p>
-                      </div>
+              </div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm text-slate-500">Payment Method</p>
-                        <p className="mt-2 font-semibold text-secondary">{order.paymentMethod || "Cash on Delivery"}</p>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-500">
-                            Order Progress
-                        </p>
-                        <h3 className="mt-1 text-xl font-semibold text-secondary">
-                          Order #{(order._id || "").slice(-8).toUpperCase() || "N/A"}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <OrderStatusTracker currentStatus={order.orderStatus} />
-                    </div>
-                  </section>
-
-                  <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-                    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-2xl bg-accent/10 p-2.5 text-accent">
-                          <FaUser className="text-lg" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-secondary">Customer Information</h3>
-                          <p className="text-sm text-slate-500">Personal and contact details</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 space-y-4">
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-sm text-slate-500">Customer Name</p>
-                          <p className="mt-1 font-semibold text-secondary">
-                            {order.customerName || order.user?.name || "N/A"}
-                          </p>
-                        </div>
-
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-sm text-slate-500">Email</p>
-                          <p className="mt-1 font-semibold text-secondary">{order.email || order.user?.email || "N/A"}</p>
-                        </div>
-
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-sm text-slate-500">Phone Number</p>
-                          <p className="mt-1 font-semibold text-secondary">{order.phone || "N/A"}</p>
-                        </div>
-                      </div>
-                    </section>
-
-                    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-2xl bg-accent/10 p-2.5 text-accent">
-                          <FaTruck className="text-lg" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-secondary">Delivery Information</h3>
-                          <p className="text-sm text-slate-500">Shipping destination and notes</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 space-y-4">
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-sm text-slate-500">Street Address</p>
-                          <p className="mt-1 font-semibold text-secondary">{order.streetAddress || order.deliveryAddress || "N/A"}</p>
-                        </div>
-
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p className="text-sm text-slate-500">City</p>
-                            <p className="mt-1 font-semibold text-secondary">{order.city || "N/A"}</p>
-                          </div>
-                          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p className="text-sm text-slate-500">District</p>
-                            <p className="mt-1 font-semibold text-secondary">{order.district || "N/A"}</p>
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-sm text-slate-500">Postal Code</p>
-                          <p className="mt-1 font-semibold text-secondary">{order.postalCode || "N/A"}</p>
-                        </div>
-
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <div className="flex items-center gap-2 text-slate-500">
-                            <FaLocationDot className="text-sm" />
-                            <p className="text-sm">Delivery Notes</p>
-                          </div>
-                          <p className="mt-2 font-semibold text-secondary">
-                            {order.deliveryNotes ? order.deliveryNotes : "No delivery notes."}
-                          </p>
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-
-                  <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-2xl bg-accent/10 p-2.5 text-accent">
-                          <FaBoxOpen className="text-lg" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-secondary">Ordered Products</h3>
-                          <p className="text-sm text-slate-500">Every item in this order</p>
-                        </div>
-                      </div>
-
-                      <span className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm font-medium text-slate-600">
-                        {items.length} item{items.length === 1 ? "" : "s"}
-                      </span>
-                    </div>
-
-                    <div className="mt-6 space-y-4">
-                      {items.map((item, index) => (
-                        <div
-                          key={item.productId || item._id || `${item.name}-${index}`}
-                          className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-center md:justify-between"
-                        >
-                          <div className="flex items-center gap-4">
-                            <img
-                              src={item.image || item.productImage || "https://via.placeholder.com/96"}
-                              alt={item.name || "Product"}
-                              className="h-20 w-20 rounded-2xl object-cover shadow-sm"
-                            />
-                            <div>
-                              <h4 className="font-semibold text-secondary">{item.name || "Product"}</h4>
-                              <p className="mt-1 text-sm text-slate-500">Quantity: {item.quantity || 0}</p>
-                            </div>
-                          </div>
-
-                          <div className="grid gap-3 text-sm md:grid-cols-3 md:gap-8">
-                            <div>
-                              <p className="text-slate-500">Unit Price</p>
-                              <p className="mt-1 font-semibold text-secondary">{formatPrice(item.price)}</p>
-                            </div>
-                            <div>
-                              <p className="text-slate-500">Quantity</p>
-                              <p className="mt-1 font-semibold text-secondary">{item.quantity || 0}</p>
-                            </div>
-                            <div>
-                              <p className="text-slate-500">Line Total</p>
-                              <p className="mt-1 font-semibold text-secondary">
-                                {formatPrice((item.price || 0) * (item.quantity || 0))}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-2xl bg-accent/10 p-2.5 text-accent">
-                        <FaCreditCard className="text-lg" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-secondary">Payment Summary</h3>
-                        <p className="text-sm text-slate-500">A clear breakdown of your charges</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 space-y-4 text-sm text-slate-700">
-                      <div className="flex items-center justify-between">
-                        <span>Subtotal</span>
-                        <span className="font-medium text-secondary">{formatPrice(order.subtotal ?? order.totalAmount ?? 0)}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span>Delivery Fee</span>
-                        <span className="font-medium text-secondary">{formatPrice(order.deliveryFee ?? 0)}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span>Discount</span>
-                        <span className="font-medium text-secondary">{formatPrice(order.discount ?? 0)}</span>
-                      </div>
-
-                      <div className="mt-4 border-t border-slate-200 pt-4">
-                        <div className="flex items-center justify-between text-base font-semibold text-secondary">
-                          <span>Grand Total</span>
-                          <span className="text-2xl text-emerald-600">
-                            {formatPrice(order.grandTotal ?? order.totalAmount ?? 0)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              )}
             </div>
-          </div>
-        </div>
+
+            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+
+              <div>
+
+                <p className="text-sm text-slate-500">
+                  Order ID
+                </p>
+
+                <p className="mt-2 font-semibold">
+                  {order._id}
+                </p>
+
+              </div>
+
+              <div>
+
+                <p className="text-sm text-slate-500">
+                  Order Date
+                </p>
+
+                <p className="mt-2 font-semibold">
+                  {formatDate(order.createdAt)}
+                </p>
+
+              </div>
+
+              <div>
+
+                <p className="text-sm text-slate-500">
+                  Status
+                </p>
+
+                <p className="mt-2 font-semibold">
+                  {order.orderStatus}
+                </p>
+
+              </div>
+
+              <div>
+
+                <p className="text-sm text-slate-500">
+                  Payment
+                </p>
+
+                <p className="mt-2 font-semibold">
+                  {order.paymentMethod}
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          {/* Progress */}
+
+          <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
+
+            <div className="mb-6">
+
+              <h2 className="text-xl font-semibold text-secondary">
+                Order Progress
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Current shipping progress
+              </p>
+
+            </div>
+
+            <OrderStatusTracker
+              currentStatus={order.orderStatus}
+            />
+
+          </section>
+
+          {/* ======= Customer + Delivery starts here ======= */}
+          {/* Customer + Delivery */}
+<div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+  {/* Customer Information */}
+  <section className="rounded-2xl border border-slate-200 bg-white p-8">
+
+    <div className="mb-8 flex items-center gap-3">
+
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+        <FaUser />
       </div>
-    </>
-  );
+
+      <div>
+        <h2 className="text-xl font-semibold text-secondary">
+          Customer Information
+        </h2>
+
+        <p className="text-sm text-slate-500">
+          Contact information of the customer
+        </p>
+      </div>
+
+    </div>
+
+    <div className="space-y-6">
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Full Name
+        </p>
+
+        <p className="mt-1 text-base font-medium text-secondary">
+          {order.customerName || "N/A"}
+        </p>
+      </div>
+
+      <div className="border-t border-slate-100"></div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Email Address
+        </p>
+
+        <p className="mt-1 text-base font-medium text-secondary">
+          {order.email || "N/A"}
+        </p>
+      </div>
+
+      <div className="border-t border-slate-100"></div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Phone Number
+        </p>
+
+        <p className="mt-1 text-base font-medium text-secondary">
+          {order.phone || "N/A"}
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  {/* Delivery Information */}
+  <section className="rounded-2xl border border-slate-200 bg-white p-8">
+
+    <div className="mb-8 flex items-center gap-3">
+
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+        <FaTruck />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold text-secondary">
+          Delivery Information
+        </h2>
+
+        <p className="text-sm text-slate-500">
+          Shipping destination details
+        </p>
+      </div>
+
+    </div>
+
+    <div className="space-y-6">
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Street Address
+        </p>
+
+        <p className="mt-1 text-base font-medium text-secondary">
+          {order.streetAddress || "N/A"}
+        </p>
+      </div>
+
+      <div className="border-t border-slate-100"></div>
+
+      <div className="grid grid-cols-2 gap-6">
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            City
+          </p>
+
+          <p className="mt-1 text-base font-medium text-secondary">
+            {order.city || "N/A"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            District
+          </p>
+
+          <p className="mt-1 text-base font-medium text-secondary">
+            {order.district || "N/A"}
+          </p>
+        </div>
+
+      </div>
+
+      <div className="border-t border-slate-100"></div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Postal Code
+        </p>
+
+        <p className="mt-1 text-base font-medium text-secondary">
+          {order.postalCode || "N/A"}
+        </p>
+      </div>
+
+      <div className="border-t border-slate-100"></div>
+
+      <div>
+
+        <div className="mb-2 flex items-center gap-2 text-slate-500">
+          <FaLocationDot className="text-sm" />
+
+          <p className="text-xs font-semibold uppercase tracking-wider">
+            Delivery Notes
+          </p>
+        </div>
+
+        <p className="text-base font-medium text-secondary">
+          {order.deliveryNotes || "No delivery notes."}
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+{/* ===== Ordered Products starts here ===== */}
+{/* Ordered Products */}
+<section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
+
+  <div className="mb-8 flex items-center gap-3">
+
+    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+      <FaBoxOpen />
+    </div>
+
+    <div>
+      <h2 className="text-xl font-semibold text-secondary">
+        Ordered Products
+      </h2>
+
+      <p className="text-sm text-slate-500">
+        Items included in this order
+      </p>
+    </div>
+
+  </div>
+
+  {items.length === 0 ? (
+
+    <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center text-slate-500">
+      No products found.
+    </div>
+
+  ) : (
+
+    <div className="divide-y divide-slate-100">
+
+      {items.map((item) => (
+
+        <div
+          key={item.productId}
+          className="flex flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between"
+        >
+
+          {/* Left */}
+          <div className="flex items-center gap-4">
+
+            <img
+              src={item.image}
+              alt={item.name}
+              className="h-20 w-20 rounded-xl border border-slate-200 object-cover"
+            />
+
+            <div>
+
+              <h3 className="text-lg font-semibold text-secondary">
+                {item.name}
+              </h3>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Quantity : {item.quantity}
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* Right */}
+          <div className="text-left sm:text-right">
+
+            <p className="text-sm text-slate-500">
+              Unit Price
+            </p>
+
+            <p className="font-medium text-secondary">
+              {formatPrice(item.price)}
+            </p>
+
+            <p className="mt-3 text-sm text-slate-500">
+              Total
+            </p>
+
+            <p className="text-lg font-bold text-accent">
+              {formatPrice(item.price * item.quantity)}
+            </p>
+
+          </div>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</section>
+
+{/* ===== Payment Summary starts here ===== */}
+{/* Payment Summary */}
+<section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
+
+  <div className="mb-8 flex items-center gap-3">
+
+    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+      <FaCreditCard />
+    </div>
+
+    <div>
+      <h2 className="text-xl font-semibold text-secondary">
+        Payment Summary
+      </h2>
+
+      <p className="text-sm text-slate-500">
+        Final breakdown of your order
+      </p>
+    </div>
+
+  </div>
+
+  <div className="space-y-5">
+
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">
+        Subtotal
+      </span>
+
+      <span className="font-semibold text-secondary">
+        {formatPrice(order.subtotal)}
+      </span>
+    </div>
+
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">
+        Delivery Fee
+      </span>
+
+      <span className="font-semibold text-secondary">
+        {formatPrice(order.deliveryFee)}
+      </span>
+    </div>
+
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">
+        Discount
+      </span>
+
+      <span className="font-semibold text-secondary">
+        - {formatPrice(order.discount)}
+      </span>
+    </div>
+
+    <div className="border-t border-slate-200 pt-5">
+
+      <div className="flex items-center justify-between">
+
+        <span className="text-xl font-bold text-secondary">
+          Grand Total
+        </span>
+
+        <span className="text-3xl font-bold text-accent">
+          {formatPrice(order.grandTotal)}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+
+      <p className="text-sm font-semibold text-green-700">
+        Payment Method
+      </p>
+
+      <p className="mt-1 text-base font-medium text-secondary">
+        {order.paymentMethod}
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+</div>
+
+</div>
+
+</>
+
+);
 }
 
 export default OrderDetails;

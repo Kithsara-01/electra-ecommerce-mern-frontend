@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 
 import { getCart } from "../services/cartService";
 import { placeOrder } from "../services/orderService";
+import { getDeliveryFee, getEstimatedDelivery,} from "../utils/delivery";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ function Checkout() {
   const postalCodeRef = useRef(null);
   const termsRef = useRef(null);
 
-  const DELIVERY_FEE = 350;
+  
 
   // ===============================================
   // LOAD DATA
@@ -216,8 +217,16 @@ function Checkout() {
     0
   );
 
+  const deliveryFee = getDeliveryFee(district);
+
+  const estimatedDelivery = getEstimatedDelivery(district);
+
   const discount = 0;
-  const grandTotal = subtotal + DELIVERY_FEE;
+
+  const grandTotal =
+    subtotal +
+    deliveryFee -
+    discount;
 
   // ===============================================
   // HANDLE PLACE ORDER
@@ -843,7 +852,17 @@ function Checkout() {
                   </div>
                   <div className="flex justify-between text-gray-700">
                     <span>Delivery Fee</span>
-                    <span>{formatPrice(DELIVERY_FEE)}</span>
+                    <span>{formatPrice(deliveryFee)}</span>
+                  </div>
+
+                  <div className="rounded-lg border border-accent/10 bg-accent/5 p-3">
+                    <p className="text-xs font-medium text-slate-500">
+                      Estimated Delivery
+                    </p>
+
+                    <p className="mt-1 font-semibold text-accent">
+                      {estimatedDelivery}
+                    </p>
                   </div>
                   <div className="flex justify-between text-gray-700">
                     <span>Discount</span>
