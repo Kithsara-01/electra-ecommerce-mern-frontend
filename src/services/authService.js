@@ -18,15 +18,7 @@ export const registerCustomer = async (userData) => {
 };
 
 
-// ===============================
-// Supplier Register
-// ===============================
-export const registerSupplier = async (userData) => {
 
-  const response = await API.post("/auth/register/supplier", userData);
-  
-  return response.data;
-};
 
 
 // ===============================

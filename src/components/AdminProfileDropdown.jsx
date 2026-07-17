@@ -21,8 +21,7 @@ function AdminProfileDropdown() {
 
   const adminName = user?.name || "Admin";
 
-//////////////  
-  //const adminImage = user?.profileImage || defaultProfile;
+
 
 const adminImage = user?.profileImage
   ? `${user.profileImage}?t=${Date.now()}`
@@ -74,20 +73,19 @@ const adminImage = user?.profileImage
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-3 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary transition duration-200"
+        className="flex items-center gap-4 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary transition duration-200"
       >
         <img
           src={adminImage}
           alt={adminName}
-          className="h-10 w-10 rounded-full object-cover border-2 border-border hover:border-accent transition duration-200"
-        />
+          className="h-14 w-14 rounded-full object-cover border-2 border-border hover:border-accent transition duration-200"        />
 
         <div className="text-right">
-          <p className="text-sm font-semibold text-secondary">
+          <p className="text-base font-semibold text-secondary">
             {adminName}
           </p>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             Admin
           </p>
         </div>

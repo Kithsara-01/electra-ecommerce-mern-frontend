@@ -51,11 +51,7 @@ function Login() {
 
           navigate("/admin-dashboard");
 
-        } else if (user.role === "Supplier") {
-
-          navigate("/supplier-dashboard");
-
-        }
+        } 
 
       
 
@@ -151,20 +147,14 @@ function Login() {
             Don't have an account?
           </p>
 
-          <div className="flex justify-center gap-6 mt-3">
+          <div className="flex justify-center mt-3">
             <Link
               to="/customer-register"
               className="text-accent hover:underline font-medium"
             >
-              Customer Register
+              Create Account
             </Link>
 
-            <Link
-              to="/supplier-register"
-              className="text-accent hover:underline font-medium"
-            >
-              Supplier Register
-            </Link>
           </div>
         </div>
       </div>

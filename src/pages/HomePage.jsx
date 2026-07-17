@@ -17,16 +17,14 @@ function HomePage() {
       navigate("/admin-dashboard");
     }
 
-    if (user?.role === "Supplier") {
-      navigate("/supplier-dashboard");
-    }
+    
   }, [user, loading, navigate]);
 
   if (loading) {
     return null;
   }
 
-  if (user?.role === "Admin" || user?.role === "Supplier") {
+  if (user?.role === "Admin") {
     return null;
   }
 

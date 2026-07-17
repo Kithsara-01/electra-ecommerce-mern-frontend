@@ -5,7 +5,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
-import SupplierRegister from "./pages/SupplierRegister";
+
 import CustomerRegister from "./pages/CustomerRegister";
 
 import Products from "./pages/Products";
@@ -13,7 +13,6 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 
-import SupplierDashboard from "./pages/SupplierDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
 import Profile from "./pages/Profile";
@@ -63,7 +62,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/customer-register" element={<CustomerRegister />} />
-        <Route path="/supplier-register" element={<SupplierRegister />} />
+        
 
         {/* Customer Shopping */}
         <Route path="/products" element={<Products />} />
@@ -85,8 +84,7 @@ function App() {
   }
 />
 
-        {/* Supplier */}
-        <Route path="/supplier-dashboard" element={<ProtectedRoute allowedRoles={["Supplier"]}><SupplierDashboard /></ProtectedRoute>} />
+        
 
         {/* Admin */}
         <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} />

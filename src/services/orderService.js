@@ -27,10 +27,23 @@ export const getOrderById = async (orderId) => {
 // ===============================
 // Get All Orders (Admin)
 // ===============================
-export const getAllOrders = async () => {
-  const response = await API.get("/orders");
-  return response.data;
-};
+export const getAllOrders = async (
+  page = 1,
+  limit = 10,
+  search = "",
+  status = "All"
+    ) => {
+      const response = await API.get("/orders", {
+        params: {
+          page,
+          limit,
+          search,
+          status,
+        },
+      });
+
+      return response.data;
+    };
 
 // ===============================
 // Update Order Status (Admin)
