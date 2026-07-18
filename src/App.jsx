@@ -4,12 +4,15 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import HomePage from "./pages/HomePage";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 
 import CustomerRegister from "./pages/CustomerRegister";
 
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
+import Wishlist from "./pages/Wishlist";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 
@@ -19,6 +22,8 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
+import MyMessages from "./pages/MyMessages";
+import MyMessageDetails from "./pages/MyMessageDetails";
 
 import AdminProfile from "./pages/AdminProfile";
 import AdminEditProfile from "./pages/AdminEditProfile";
@@ -29,6 +34,8 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminOrders from "./pages/AdminOrders";
 import AdminOrderDetails from "./pages/AdminOrderDetails";
 import AdminStocks from "./pages/AdminStocks";
+import CustomerCare from "./pages/CustomerCare";
+import CustomerCareDetails from "./pages/CustomerCareDetails";
 
 function App() {
   return (
@@ -60,6 +67,8 @@ function App() {
 
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/customer-register" element={<CustomerRegister />} />
         
@@ -67,10 +76,10 @@ function App() {
         {/* Customer Shopping */}
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
-        <Route path="/cart" element={<ProtectedRoute allowedRoles={["Customer"]}> <Cart />
-    </ProtectedRoute>
-  }
-/>
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/cart" element={<ProtectedRoute allowedRoles={["Customer"]}> <Cart /> </ProtectedRoute>}/>
+        <Route path="/my-messages" element={<ProtectedRoute allowedRoles={["Customer"]}> <MyMessages /> </ProtectedRoute> }/>
+        <Route path="/my-messages/:id" element={<ProtectedRoute allowedRoles={["Customer"]}><MyMessageDetails /></ProtectedRoute>}/>
 
         {/* Customer */}
         <Route path="/profile" element={<ProtectedRoute allowedRoles={["Customer"]}><Profile /></ProtectedRoute>} />
@@ -97,6 +106,11 @@ function App() {
         <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminUsers /></ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrders /></ProtectedRoute>} />
         <Route path="/admin/orders/:orderId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrderDetails /></ProtectedRoute>} />
+        <Route path="/admin/customer-care" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCare /> </ProtectedRoute>}/>
+        <Route path="/admin/customer-care/:id" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCareDetails />
+    </ProtectedRoute>
+  }
+/>
 
       </Routes>
     </>

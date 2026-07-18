@@ -1,30 +1,27 @@
-import { MdOutlineSearch } from "react-icons/md";
-import { RiResetLeftFill } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
 
 function SearchBar({ value, onChange, onReset }) {
   return (
-    <div className="border-b border-slate-200 bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-2 shadow-sm">
+    <div className="bg-transparent">
+      <div className="mx-auto max-w-2xl px-4 py-3 lg:px-6">
+        <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 transition-colors focus-within:border-accent">
           {/* Search Input */}
           <input
             type="text"
             placeholder="Search electronic items..."
             value={value}
             onChange={onChange}
-            className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-slate-400"
+            className="flex-1 border-0 bg-transparent px-2 py-1.5 text-sm focus:outline-none placeholder:text-slate-400"
           />
 
-          {/* Search Button */}
-          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2FA084] text-white transition hover:opacity-90">
-            <MdOutlineSearch className="text-xl" />
-          </button>
-
-          {/* Reset Button */}
+          {/* Clear / Reset */}
           <button
+            type="button"
             onClick={onReset}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-[#2FA084] hover:text-[#2FA084]">
-            <RiResetLeftFill className="text-xl" />
+            disabled={!value}
+            className="flex h-9 w-9 items-center justify-center rounded transition-colors disabled:cursor-not-allowed disabled:text-slate-300 enabled:cursor-pointer enabled:text-slate-500 enabled:hover:bg-slate-100 enabled:hover:text-accent"
+          >
+            <IoClose className="text-lg" />
           </button>
         </div>
       </div>

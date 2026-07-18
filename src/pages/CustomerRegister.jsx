@@ -97,18 +97,18 @@ function CustomerRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-lg rounded-md border border-slate-200 bg-white p-8">
 
-        <h1 className="text-3xl font-bold text-center text-secondary">
+        <h1 className="text-2xl font-bold text-center text-slate-900">
           Customer Registration
         </h1>
 
-        <p className="text-center text-gray-500 mt-2 mb-8">
+        <p className="text-center text-sm text-slate-500 mt-2 mb-7">
           Create your customer account to start shopping.
         </p>
 
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-7">
           <label
             htmlFor="profileImage"
             className="relative cursor-pointer group"
@@ -119,11 +119,11 @@ function CustomerRegister() {
                 "https://ui-avatars.com/api/?name=User&background=E5E0D8&color=000"
               }
               alt="Profile Preview"
-              className="w-28 h-28 rounded-full object-cover border-4 border-accent"
+              className="w-24 h-24 rounded-full object-cover border-2 border-accent"
             />
 
-            <div className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white group-hover:brightness-90 transition">
-              <FaCamera />
+            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white transition-colors group-hover:bg-secondary">
+              <FaCamera className="text-xs" />
             </div>
           </label>
 
@@ -135,19 +135,19 @@ function CustomerRegister() {
             className="hidden"
           />
 
-          <p className="text-sm text-gray-500 mt-3">
+          <p className="text-xs text-slate-500 mt-2.5">
             Profile Image (Optional)
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-            <label className="block mb-2 font-medium text-secondary">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-1.5 text-sm font-medium text-slate-700">
               Full Name
             </label>
 
             <div className="relative">
-              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400" />
 
               <input
                 type="text"
@@ -156,18 +156,18 @@ function CustomerRegister() {
                 onChange={handleChange}
                 placeholder="Enter your full name"
                 required
-                className="w-full border border-gray-300 rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-accent"
+                className="w-full rounded border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block mb-2 font-medium text-secondary">
+            <label className="block mb-1.5 text-sm font-medium text-slate-700">
               Email
             </label>
 
             <div className="relative">
-              <MdEmail className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
+              <MdEmail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
 
               <input
                 type="email"
@@ -176,18 +176,18 @@ function CustomerRegister() {
                 onChange={handleChange}
                 placeholder="Enter your email"
                 required
-                className="w-full border border-gray-300 rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-accent"
+                className="w-full rounded border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block mb-2 font-medium text-secondary">
+            <label className="block mb-1.5 text-sm font-medium text-slate-700">
               Phone Number
             </label>
 
             <div className="relative">
-              <FaPhoneAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400" />
 
               <input
                 type="tel"
@@ -197,18 +197,18 @@ function CustomerRegister() {
                 placeholder="Enter your phone number"
                 maxLength={10}
                 required
-                className="w-full border border-gray-300 rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-accent"
+                className="w-full rounded border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block mb-2 font-medium text-secondary">
+            <label className="block mb-1.5 text-sm font-medium text-slate-700">
               Address
             </label>
 
             <div className="relative">
-              <FaLocationDot className="absolute left-4 top-4 text-gray-400" />
+              <FaLocationDot className="absolute left-3.5 top-3.5 text-sm text-slate-400" />
 
               <textarea
                 rows="3"
@@ -216,18 +216,18 @@ function CustomerRegister() {
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="Enter your address"
-                className="w-full border border-gray-300 rounded-lg pl-12 pr-4 py-3 resize-none focus:outline-none focus:border-accent"
+                className="w-full rounded border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none transition-colors resize-none focus:border-accent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block mb-2 font-medium text-secondary">
+            <label className="block mb-1.5 text-sm font-medium text-slate-700">
               Password
             </label>
 
             <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400" />
 
               <input
                 type={showPassword ? "text" : "password"}
@@ -236,13 +236,13 @@ function CustomerRegister() {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 required
-                className="w-full border border-gray-300 rounded-lg pl-12 pr-12 py-3 focus:outline-none focus:border-accent"
+                className="w-full rounded border border-slate-200 bg-white pl-11 pr-11 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-accent"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -252,20 +252,20 @@ function CustomerRegister() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent text-white py-3 rounded-lg hover:brightness-90 transition duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full cursor-pointer rounded bg-accent py-2.5 text-sm font-semibold text-white transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-600">
+        <div className="mt-7 text-center">
+          <p className="text-sm text-slate-500">
             Already have an account?
           </p>
 
           <Link
             to="/login"
-            className="text-accent font-medium hover:underline"
+            className="cursor-pointer text-sm font-medium text-accent transition-colors hover:text-secondary"
           >
             Login
           </Link>
