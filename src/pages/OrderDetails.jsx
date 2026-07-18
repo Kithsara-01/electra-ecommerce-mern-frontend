@@ -6,7 +6,6 @@ import {
   FaBoxOpen,
   FaCreditCard,
   FaLocationDot,
-  FaReceipt,
   FaTruck,
   FaUser,
 } from "react-icons/fa6";
@@ -39,27 +38,53 @@ const formatDate = (value) => {
   });
 };
 
+// Status badges: accent for the positive/delivered state, rose for cancelled,
+// neutral slate for everything still in progress.
 const getStatusStyles = (status = "") => {
   switch (status.toLowerCase()) {
-    case "pending":
-      return "bg-amber-100 text-amber-700";
-
-    case "processing":
-      return "bg-blue-100 text-blue-700";
-
-    case "shipped":
-      return "bg-purple-100 text-purple-700";
-
     case "delivered":
-      return "bg-green-100 text-green-700";
+      return "bg-accent/10 text-accent";
 
     case "cancelled":
-      return "bg-red-100 text-red-700";
+      return "bg-rose-50 text-rose-700";
+
+    case "pending":
+    case "processing":
+    case "shipped":
+      return "bg-slate-100 text-slate-700";
 
     default:
       return "bg-slate-100 text-slate-700";
   }
 };
+
+// Label/value pair reused across every section of the page.
+function InfoRow({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-medium text-slate-900">{value || "N/A"}</p>
+    </div>
+  );
+}
+
+// Section heading used inside the single page — no card border, just an
+// icon + title + subtitle, since everything now lives in one white sheet.
+function SectionHeading({ icon: Icon, title, subtitle }) {
+  return (
+    <div className="mb-6 flex items-center gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
+        <Icon />
+      </div>
+      <div>
+        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
 
 function OrderDetails() {
   const navigate = useNavigate();
@@ -92,14 +117,20 @@ function OrderDetails() {
 
   const items = order?.items || [];
 
+  const handleImageError = (e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src =
+      "https://placehold.co/80x80/FFFFFF/94A3B8?text=No+Image";
+  };
+
   if (loading) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
 
-        <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-primary">
           <div className="text-center">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl font-semibold text-slate-900">
               Loading Order...
             </h2>
           </div>
@@ -111,13 +142,11 @@ function OrderDetails() {
   if (error) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
 
-        <div className="min-h-screen bg-primary flex items-center justify-center">
-          <div className="rounded-2xl bg-white p-8 shadow">
-            <h2 className="text-red-600 font-bold">
-              {error}
-            </h2>
+        <div className="flex min-h-screen items-center justify-center bg-primary">
+          <div className="rounded border border-rose-200 bg-rose-50 p-8">
+            <h2 className="font-semibold text-rose-700">{error}</h2>
           </div>
         </div>
       </>
@@ -126,502 +155,225 @@ function OrderDetails() {
 
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
 
       <div className="min-h-screen bg-primary py-10">
-
-        <div className="mx-auto max-w-7xl px-5">
-
+        <div className="mx-auto max-w-6xl px-5">
+          {/* Back sits outside the sheet */}
           <button
             onClick={() => navigate(-1)}
-            className="mb-8 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+            className="mb-6 flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-accent hover:text-accent"
           >
             <FaArrowLeft />
             Back
           </button>
 
-          <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-            <div>
-
-              <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-                Order Details
-              </p>
-
-              <h1 className="mt-2 text-4xl font-bold text-secondary">
-                Order #{order._id.slice(-8).toUpperCase()}
-              </h1>
-
-              <p className="mt-2 text-slate-500">
-                Review every detail about your purchase.
-              </p>
-
-            </div>
-
-            <div className="flex items-center gap-3">
-
-              <span
-                className={`rounded-full px-4 py-2 text-sm font-semibold ${getStatusStyles(
-                  order.orderStatus
-                )}`}
-              >
-                {order.orderStatus}
-              </span>
-
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
-                {formatDate(order.createdAt)}
-              </span>
-
-            </div>
-
-          </div>
-
-          {/* Overview */}
-
-          <section className="rounded-2xl border border-slate-200 bg-white p-8">
-
-            <div className="flex items-center gap-3">
-
-              <div className="rounded-xl bg-accent/10 p-3 text-accent">
-                <FaReceipt />
+          {/* Everything else lives inside one continuous white sheet */}
+          <div className="rounded border border-slate-200 bg-white p-6 sm:p-8">
+            {/* Title + badges */}
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+                  Order Details
+                </p>
+                <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+                  Order #{order._id.slice(-8).toUpperCase()}
+                </h1>
+                <p className="mt-2 text-sm text-slate-500">
+                  Review every detail about your purchase.
+                </p>
               </div>
 
-              <div>
-
-                <h2 className="text-xl font-semibold text-secondary">
-                  Order Overview
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Basic information about this order
-                </p>
-
-              </div>
-
-            </div>
-
-            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-              <div>
-
-                <p className="text-sm text-slate-500">
-                  Order ID
-                </p>
-
-                <p className="mt-2 font-semibold">
-                  {order._id}
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-sm text-slate-500">
-                  Order Date
-                </p>
-
-                <p className="mt-2 font-semibold">
-                  {formatDate(order.createdAt)}
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-sm text-slate-500">
-                  Status
-                </p>
-
-                <p className="mt-2 font-semibold">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`rounded-full px-4 py-2 text-sm font-semibold ${getStatusStyles(
+                    order.orderStatus
+                  )}`}
+                >
                   {order.orderStatus}
-                </p>
+                </span>
 
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
+                  {formatDate(order.createdAt)}
+                </span>
+              </div>
+            </div>
+
+            {/* Order meta */}
+            <div className="mt-6 grid grid-cols-2 gap-6 border-t border-slate-100 pt-6 sm:grid-cols-4">
+              <InfoRow label="Order ID" value={order._id} />
+              <InfoRow label="Order Date" value={formatDate(order.createdAt)} />
+              <InfoRow label="Status" value={order.orderStatus} />
+              <InfoRow label="Payment" value={order.paymentMethod} />
+            </div>
+
+            {/* Progress */}
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <div className="mb-6">
+                <h2 className="text-base font-semibold text-slate-900">
+                  Order Progress
+                </h2>
+                <p className="text-sm text-slate-500">Current shipping progress</p>
+              </div>
+
+              <OrderStatusTracker currentStatus={order.orderStatus} />
+            </div>
+
+            {/* Customer + Delivery */}
+            <div className="mt-8 grid gap-8 border-t border-slate-100 pt-8 lg:grid-cols-2">
+              <div>
+                <SectionHeading
+                  icon={FaUser}
+                  title="Customer Information"
+                  subtitle="Contact information of the customer"
+                />
+
+                <div className="space-y-4">
+                  <InfoRow label="Full Name" value={order.customerName} />
+                  <div className="border-t border-slate-100" />
+                  <InfoRow label="Email Address" value={order.email} />
+                  <div className="border-t border-slate-100" />
+                  <InfoRow label="Phone Number" value={order.phone} />
+                </div>
               </div>
 
               <div>
+                <SectionHeading
+                  icon={FaTruck}
+                  title="Delivery Information"
+                  subtitle="Shipping destination details"
+                />
 
-                <p className="text-sm text-slate-500">
-                  Payment
-                </p>
+                <div className="space-y-4">
+                  <InfoRow label="Street Address" value={order.streetAddress} />
 
-                <p className="mt-2 font-semibold">
-                  {order.paymentMethod}
-                </p>
+                  <div className="border-t border-slate-100" />
 
+                  <div className="grid grid-cols-2 gap-6">
+                    <InfoRow label="City" value={order.city} />
+                    <InfoRow label="District" value={order.district} />
+                  </div>
+
+                  <div className="border-t border-slate-100" />
+
+                  <InfoRow label="Postal Code" value={order.postalCode} />
+
+                  <div className="border-t border-slate-100" />
+
+                  <div>
+                    <div className="mb-1 flex items-center gap-2 text-slate-500">
+                      <FaLocationDot className="text-sm" />
+                      <p className="text-xs font-semibold uppercase tracking-wider">
+                        Delivery Notes
+                      </p>
+                    </div>
+                    <p className="text-sm font-medium text-slate-900">
+                      {order.deliveryNotes || "No delivery notes."}
+                    </p>
+                  </div>
+                </div>
               </div>
-
             </div>
 
-          </section>
+            {/* Ordered Products */}
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionHeading
+                icon={FaBoxOpen}
+                title="Ordered Products"
+                subtitle="Items included in this order"
+              />
 
-          {/* Progress */}
+              {items.length === 0 ? (
+                <div className="rounded border border-dashed border-slate-300 py-12 text-center text-sm text-slate-500">
+                  No products found.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {items.map((item) => (
+                    <div
+                      key={item.productId}
+                      className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          onError={handleImageError}
+                          className="h-16 w-16 rounded border border-slate-200 bg-white object-contain p-1"
+                        />
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-900">
+                            {item.name}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Qty <strong className="text-slate-700">{item.quantity}</strong>{" "}
+                            &middot; {formatPrice(item.price)} each
+                          </p>
+                        </div>
+                      </div>
 
-          <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
-
-            <div className="mb-6">
-
-              <h2 className="text-xl font-semibold text-secondary">
-                Order Progress
-              </h2>
-
-              <p className="text-sm text-slate-500">
-                Current shipping progress
-              </p>
-
+                      <p className="text-sm font-semibold text-accent sm:text-right">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <OrderStatusTracker
-              currentStatus={order.orderStatus}
-            />
-
-          </section>
-
-          {/* ======= Customer + Delivery starts here ======= */}
-          {/* Customer + Delivery */}
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-  {/* Customer Information */}
-  <section className="rounded-2xl border border-slate-200 bg-white p-8">
-
-    <div className="mb-8 flex items-center gap-3">
-
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
-        <FaUser />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold text-secondary">
-          Customer Information
-        </h2>
-
-        <p className="text-sm text-slate-500">
-          Contact information of the customer
-        </p>
-      </div>
-
-    </div>
-
-    <div className="space-y-6">
-
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Full Name
-        </p>
-
-        <p className="mt-1 text-base font-medium text-secondary">
-          {order.customerName || "N/A"}
-        </p>
-      </div>
-
-      <div className="border-t border-slate-100"></div>
-
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Email Address
-        </p>
-
-        <p className="mt-1 text-base font-medium text-secondary">
-          {order.email || "N/A"}
-        </p>
-      </div>
-
-      <div className="border-t border-slate-100"></div>
-
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Phone Number
-        </p>
-
-        <p className="mt-1 text-base font-medium text-secondary">
-          {order.phone || "N/A"}
-        </p>
-      </div>
-
-    </div>
-
-  </section>
-
-  {/* Delivery Information */}
-  <section className="rounded-2xl border border-slate-200 bg-white p-8">
-
-    <div className="mb-8 flex items-center gap-3">
-
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
-        <FaTruck />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold text-secondary">
-          Delivery Information
-        </h2>
-
-        <p className="text-sm text-slate-500">
-          Shipping destination details
-        </p>
-      </div>
-
-    </div>
-
-    <div className="space-y-6">
-
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Street Address
-        </p>
-
-        <p className="mt-1 text-base font-medium text-secondary">
-          {order.streetAddress || "N/A"}
-        </p>
-      </div>
-
-      <div className="border-t border-slate-100"></div>
-
-      <div className="grid grid-cols-2 gap-6">
-
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            City
-          </p>
-
-          <p className="mt-1 text-base font-medium text-secondary">
-            {order.city || "N/A"}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            District
-          </p>
-
-          <p className="mt-1 text-base font-medium text-secondary">
-            {order.district || "N/A"}
-          </p>
-        </div>
-
-      </div>
-
-      <div className="border-t border-slate-100"></div>
-
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Postal Code
-        </p>
-
-        <p className="mt-1 text-base font-medium text-secondary">
-          {order.postalCode || "N/A"}
-        </p>
-      </div>
-
-      <div className="border-t border-slate-100"></div>
-
-      <div>
-
-        <div className="mb-2 flex items-center gap-2 text-slate-500">
-          <FaLocationDot className="text-sm" />
-
-          <p className="text-xs font-semibold uppercase tracking-wider">
-            Delivery Notes
-          </p>
-        </div>
-
-        <p className="text-base font-medium text-secondary">
-          {order.deliveryNotes || "No delivery notes."}
-        </p>
-
-      </div>
-
-    </div>
-
-  </section>
-
-</div>
-
-{/* ===== Ordered Products starts here ===== */}
-{/* Ordered Products */}
-<section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
-
-  <div className="mb-8 flex items-center gap-3">
-
-    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
-      <FaBoxOpen />
-    </div>
-
-    <div>
-      <h2 className="text-xl font-semibold text-secondary">
-        Ordered Products
-      </h2>
-
-      <p className="text-sm text-slate-500">
-        Items included in this order
-      </p>
-    </div>
-
-  </div>
-
-  {items.length === 0 ? (
-
-    <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center text-slate-500">
-      No products found.
-    </div>
-
-  ) : (
-
-    <div className="divide-y divide-slate-100">
-
-      {items.map((item) => (
-
-        <div
-          key={item.productId}
-          className="flex flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between"
-        >
-
-          {/* Left */}
-          <div className="flex items-center gap-4">
-
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-20 w-20 rounded-xl border border-slate-200 object-cover"
-            />
-
-            <div>
-
-              <h3 className="text-lg font-semibold text-secondary">
-                {item.name}
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Quantity : {item.quantity}
-              </p>
-
+            {/* Payment Summary */}
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionHeading icon={FaCreditCard} title="Payment Summary" />
+
+              <div className="max-w-sm space-y-3 sm:ml-auto">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">Subtotal</span>
+                  <span className="font-semibold text-slate-900">
+                    {formatPrice(order.subtotal)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">Delivery Fee</span>
+                  <span className="font-semibold text-slate-900">
+                    {formatPrice(order.deliveryFee)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">Discount</span>
+                  <span className="font-semibold text-slate-900">
+                    - {formatPrice(order.discount)}
+                  </span>
+                </div>
+
+                <div className="border-t border-slate-200 pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-bold text-slate-900">
+                      Grand Total
+                    </span>
+                    <span className="text-xl font-bold text-accent">
+                      {formatPrice(order.grandTotal)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded border border-accent/20 bg-accent/10 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+                    Payment Method
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">
+                    {order.paymentMethod}
+                  </p>
+                </div>
+              </div>
             </div>
-
           </div>
-
-          {/* Right */}
-          <div className="text-left sm:text-right">
-
-            <p className="text-sm text-slate-500">
-              Unit Price
-            </p>
-
-            <p className="font-medium text-secondary">
-              {formatPrice(item.price)}
-            </p>
-
-            <p className="mt-3 text-sm text-slate-500">
-              Total
-            </p>
-
-            <p className="text-lg font-bold text-accent">
-              {formatPrice(item.price * item.quantity)}
-            </p>
-
-          </div>
-
         </div>
-
-      ))}
-
-    </div>
-
-  )}
-
-</section>
-
-{/* ===== Payment Summary starts here ===== */}
-{/* Payment Summary */}
-<section className="mt-8 rounded-2xl border border-slate-200 bg-white p-8">
-
-  <div className="mb-8 flex items-center gap-3">
-
-    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
-      <FaCreditCard />
-    </div>
-
-    <div>
-      <h2 className="text-xl font-semibold text-secondary">
-        Payment Summary
-      </h2>
-
-      <p className="text-sm text-slate-500">
-        Final breakdown of your order
-      </p>
-    </div>
-
-  </div>
-
-  <div className="space-y-5">
-
-    <div className="flex items-center justify-between">
-      <span className="text-slate-500">
-        Subtotal
-      </span>
-
-      <span className="font-semibold text-secondary">
-        {formatPrice(order.subtotal)}
-      </span>
-    </div>
-
-    <div className="flex items-center justify-between">
-      <span className="text-slate-500">
-        Delivery Fee
-      </span>
-
-      <span className="font-semibold text-secondary">
-        {formatPrice(order.deliveryFee)}
-      </span>
-    </div>
-
-    <div className="flex items-center justify-between">
-      <span className="text-slate-500">
-        Discount
-      </span>
-
-      <span className="font-semibold text-secondary">
-        - {formatPrice(order.discount)}
-      </span>
-    </div>
-
-    <div className="border-t border-slate-200 pt-5">
-
-      <div className="flex items-center justify-between">
-
-        <span className="text-xl font-bold text-secondary">
-          Grand Total
-        </span>
-
-        <span className="text-3xl font-bold text-accent">
-          {formatPrice(order.grandTotal)}
-        </span>
-
       </div>
-
-    </div>
-
-    <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-
-      <p className="text-sm font-semibold text-green-700">
-        Payment Method
-      </p>
-
-      <p className="mt-1 text-base font-medium text-secondary">
-        {order.paymentMethod}
-      </p>
-
-    </div>
-
-  </div>
-
-</section>
-
-</div>
-
-</div>
-
-</>
-
-);
+    </>
+  );
 }
 
 export default OrderDetails;

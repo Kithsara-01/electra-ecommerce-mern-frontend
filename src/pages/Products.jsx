@@ -135,46 +135,81 @@ const Products = () => {
 
   const visiblePageNumbers = getVisiblePageNumbers();
 
+  const hasActiveFilters =
+    selectedCategories.length > 0 ||
+    selectedBrands.length > 0 ||
+    minPrice ||
+    maxPrice ||
+    inStockOnly ||
+    outOfStockOnly;
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header showSearch={false} />
-      <SearchBar
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onReset={() => setSearchTerm("")}
-      />
 
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold tracking-widest text-[#2FA084]">
-              Welcome to Electra
-            </p>
+      {/* Hero */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+            <div className="max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+                Electra Store
+              </p>
 
-            <h3 className="text-4xl font-bold text-slate-900">
-              Shop Your Favourite Items
-            </h3>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 lg:text-4xl">
+                Explore Electronics
+              </h1>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Find the latest laptops, accessories, networking devices and
+                more from trusted brands.
+              </p>
+            </div>
+
+            <div className="w-full lg:max-w-md">
+              <SearchBar
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onReset={() => setSearchTerm("")}
+              />
+            </div>
           </div>
-
-          <p className="text-sm text-slate-600">
-            Browse our latest collection with clean, modern product cards.
-          </p>
         </div>
+      </div>
 
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="flex flex-col gap-6 lg:flex-row">
-          <aside className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:w-[260px] lg:flex-shrink-0">
-            <div className="space-y-6">
+          <aside className="w-full self-start rounded-md border border-slate-200 bg-white p-4 lg:sticky lg:top-4 lg:w-[260px] lg:flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Filters
+              </h3>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={resetFilters}
+                  className="cursor-pointer text-xs font-medium text-accent transition-colors hover:text-secondary"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="mt-4 space-y-5">
               {categories.length > 0 && (
                 <div>
-                  <h4 className="text-base font-semibold text-slate-900">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Categories
                   </h4>
-                  <div className="mt-3 space-y-2 text-[15px] text-slate-700">
+                  <div className="mt-3 space-y-2.5 text-sm text-slate-700">
                     {categories.map((item) => (
-                      <label key={item} className="flex items-center gap-2">
+                      <label
+                        key={item}
+                        className="flex cursor-pointer items-center gap-2.5 transition-colors hover:text-accent"
+                      >
                         <input
                           type="checkbox"
-                          className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          className="h-4 w-4 cursor-pointer rounded border-slate-300 text-accent accent-accent focus:ring-accent focus:ring-offset-0"
                           checked={selectedCategories.includes(item)}
                           onChange={() => toggleCategory(item)}
                         />
@@ -185,17 +220,24 @@ const Products = () => {
                 </div>
               )}
 
+              {categories.length > 0 && brands.length > 0 && (
+                <div className="border-t border-slate-100" />
+              )}
+
               {brands.length > 0 && (
                 <div>
-                  <h4 className="text-base font-semibold text-slate-900">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Brands
                   </h4>
-                  <div className="mt-3 space-y-2 text-[15px] text-slate-700">
+                  <div className="mt-3 space-y-2.5 text-sm text-slate-700">
                     {brands.map((item) => (
-                      <label key={item} className="flex items-center gap-2">
+                      <label
+                        key={item}
+                        className="flex cursor-pointer items-center gap-2.5 transition-colors hover:text-accent"
+                      >
                         <input
                           type="checkbox"
-                          className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          className="h-4 w-4 cursor-pointer rounded border-slate-300 text-accent accent-accent focus:ring-accent focus:ring-offset-0"
                           checked={selectedBrands.includes(item)}
                           onChange={() => toggleBrand(item)}
                         />
@@ -206,48 +248,52 @@ const Products = () => {
                 </div>
               )}
 
+              <div className="border-t border-slate-100" />
+
               <div>
-                <h4 className="text-base font-semibold text-slate-900">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Price Range
                 </h4>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   <input
                     type="number"
-                    placeholder="Min Price"
+                    placeholder="Min"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                    className="w-full rounded border border-slate-200 px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-accent"
                   />
                   <input
                     type="number"
-                    placeholder="Max Price"
+                    placeholder="Max"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                    className="w-full rounded border border-slate-200 px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-accent"
                   />
                 </div>
               </div>
 
+              <div className="border-t border-slate-100" />
+
               <div>
-                <h4 className="text-base font-semibold text-slate-900">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Availability
                 </h4>
-                <div className="mt-3 space-y-2 text-[15px] text-slate-700">
-                  <label className="flex items-center gap-2">
+                <div className="mt-3 space-y-2.5 text-sm text-slate-700">
+                  <label className="flex cursor-pointer items-center gap-2.5 transition-colors hover:text-accent">
                     <input
                       type="checkbox"
                       checked={inStockOnly}
                       onChange={(e) => setInStockOnly(e.target.checked)}
-                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      className="h-4 w-4 cursor-pointer rounded border-slate-300 text-accent accent-accent focus:ring-accent focus:ring-offset-0"
                     />
                     <span>In Stock</span>
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="flex cursor-pointer items-center gap-2.5 transition-colors hover:text-accent">
                     <input
                       type="checkbox"
                       checked={outOfStockOnly}
                       onChange={(e) => setOutOfStockOnly(e.target.checked)}
-                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      className="h-4 w-4 cursor-pointer rounded border-slate-300 text-accent accent-accent focus:ring-accent focus:ring-offset-0"
                     />
                     <span>Out of Stock</span>
                   </label>
@@ -256,7 +302,7 @@ const Products = () => {
 
               <button
                 onClick={resetFilters}
-                className="w-full cursor-pointer rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-black"
+                className="w-full cursor-pointer rounded border border-slate-300 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-accent hover:bg-accent hover:text-white"
               >
                 Reset Filters
               </button>
@@ -275,21 +321,21 @@ const Products = () => {
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div
                     key={index}
-                    className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                    className="animate-pulse overflow-hidden rounded-md border border-slate-200 bg-white"
                   >
-                    <div className="h-40 bg-slate-200" />
+                    <div className="h-64 bg-slate-200" />
 
                     <div className="space-y-2 p-3">
+                      <div className="h-3 w-1/3 rounded bg-slate-200" />
                       <div className="h-4 w-3/4 rounded bg-slate-200" />
-                      <div className="h-3 w-1/2 rounded bg-slate-200" />
-                      <div className="h-3 w-2/3 rounded bg-slate-200" />
+                      <div className="h-4 w-1/2 rounded bg-slate-200" />
                       <div className="h-8 w-full rounded bg-slate-200" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-700 shadow-sm">
+              <div className="rounded-md border border-red-200 bg-red-50 p-8 text-center text-red-700">
                 <h2 className="text-lg font-semibold">
                   Unable to load products
                 </h2>
@@ -297,7 +343,7 @@ const Products = () => {
                 <p className="mt-2 text-sm">{error}</p>
               </div>
             ) : displayProducts.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+              <div className="rounded-md border border-slate-200 bg-white p-10 text-center">
                 <h2 className="text-lg font-semibold text-slate-900">
                   No products available yet
                 </h2>
@@ -322,10 +368,10 @@ const Products = () => {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${
                         currentPage === 1
                           ? "cursor-not-allowed border-slate-200 text-slate-400"
-                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-[#2FA084] hover:text-[#2FA084]"
+                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
                       }`}
                     >
                       &lt; Previous
@@ -335,10 +381,10 @@ const Products = () => {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`h-10 w-10 rounded-full border text-sm font-semibold transition ${
+                        className={`h-9 w-9 rounded border text-sm font-medium transition-colors ${
                           currentPage === page
-                            ? "border-[#2FA084] bg-[#2FA084] text-white"
-                            : "border-slate-300 text-slate-700 hover:border-[#2FA084] hover:text-[#2FA084]"
+                            ? "border-accent bg-accent text-white"
+                            : "border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
                         }`}
                       >
                         {page}
@@ -348,10 +394,10 @@ const Products = () => {
                     <button
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${
                         currentPage === totalPages
                           ? "cursor-not-allowed border-slate-200 text-slate-400"
-                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-[#2FA084] hover:text-[#2FA084]"
+                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
                       }`}
                     >
                       Next &gt;

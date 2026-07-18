@@ -106,7 +106,7 @@ function Cart() {
   if (loading) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
         <div className="mx-auto max-w-7xl px-4 py-20 text-center text-xl text-slate-600">
           Loading cart...
         </div>
@@ -117,7 +117,7 @@ function Cart() {
   if (error) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
         <div className="mx-auto max-w-7xl px-4 py-20 text-center text-red-600">
           {error}
         </div>
@@ -128,9 +128,9 @@ function Cart() {
   if (cartItems.length === 0) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
         <div className="mx-auto max-w-7xl px-4 py-20">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="rounded-md border border-slate-200 bg-white p-8 text-center">
             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
               <svg
                 className="h-8 w-8 text-slate-400"
@@ -152,6 +152,12 @@ function Cart() {
             <p className="mt-2 text-slate-600">
               Add some products to get started!
             </p>
+            <button
+              onClick={() => navigate("/products")}
+              className="mt-6 cursor-pointer rounded border border-accent bg-white px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
+            >
+              Browse Products
+            </button>
           </div>
         </div>
       </>
@@ -160,7 +166,7 @@ function Cart() {
 
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
 
@@ -168,21 +174,21 @@ function Cart() {
 
           <div>
 
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
               Shopping Cart
             </p>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Review Your Cart
             </h1>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-600">
               Review your selected products before proceeding to checkout.
             </p>
 
           </div>
 
-          <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+          <div className="rounded border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
             {totalItems} {totalItems === 1 ? "Item" : "Items"}
           </div>
 
@@ -199,15 +205,15 @@ function Cart() {
                 return (
                   <div
                     key={item.productId._id}
-                    className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-accent/20 hover:shadow-md sm:flex-row sm:items-center"
+                    className="flex flex-col gap-5 rounded-md border border-slate-200 bg-white p-5 transition-colors hover:border-accent sm:flex-row sm:items-center"
                   >
                     {/* Product Image */}
                     <div className="flex-shrink-0">
-                      <div className="h-24 w-24 overflow-hidden rounded-lg bg-slate-100 sm:h-32 sm:w-32">
+                      <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded bg-white sm:h-32 sm:w-32">
                         <img
                           src={productImage}
                           alt={item.productId.name}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain p-1"
                         />
                       </div>
                     </div>
@@ -215,11 +221,11 @@ function Cart() {
                     {/* Product Details */}
                     <div className="min-w-0 flex-1">
 
-                      <h3 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">
+                      <h3 className="truncate text-base font-semibold text-slate-900">
                         {item.productId.name}
                       </h3>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-0.5 text-xs text-slate-500">
                         {item.productId.brand || "Electra"}
                       </p>
 
@@ -243,7 +249,7 @@ function Cart() {
                             Quantity
                           </p>
 
-                          <div className="flex items-center rounded-full border border-slate-200 bg-slate-50">
+                          <div className="flex items-center rounded border border-slate-200">
 
                             <button
                               onClick={() =>
@@ -257,11 +263,11 @@ function Cart() {
                                 updatingItemId === item.productId._id ||
                                 item.quantity === 1
                               }
-                              className="flex h-9 w-9 items-center justify-center rounded-l-full transition hover:bg-slate-200 disabled:opacity-40"
+                              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-l text-slate-600 transition-colors hover:bg-slate-100 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-600"
                               title="Decrease quantity"
                             >
                               <svg
-                                className="h-4 w-4 text-slate-600"
+                                className="h-4 w-4"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
@@ -273,7 +279,7 @@ function Cart() {
                               </svg>
                             </button>
 
-                            <span className="w-10 text-center font-semibold">
+                            <span className="w-10 text-center text-sm font-semibold text-slate-900">
                               {item.quantity}
                             </span>
 
@@ -286,11 +292,11 @@ function Cart() {
                                 )
                               }
                               disabled={updatingItemId === item.productId._id}
-                              className="flex h-9 w-9 items-center justify-center rounded-r-full transition hover:bg-slate-200 disabled:opacity-40"
+                              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-r text-slate-600 transition-colors hover:bg-slate-100 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-600"
                               title="Increase quantity"
                             >
                               <svg
-                                className="h-4 w-4 text-slate-600"
+                                className="h-4 w-4"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
@@ -313,7 +319,7 @@ function Cart() {
                             Subtotal
                           </p>
 
-                          <p className="text-lg font-bold text-accent">
+                          <p className="text-lg font-bold text-slate-900">
                             {formatPrice(subtotal)}
                           </p>
 
@@ -328,7 +334,7 @@ function Cart() {
                       <button
                         onClick={() => handleRemoveItem(item.productId._id)}
                         disabled={removingItemId === item.productId._id}
-                        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-all hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
                         title="Remove Item"
                       >
                         <svg
@@ -353,19 +359,19 @@ function Cart() {
 
           {/* Cart Summary Section */}
           <div className="lg:col-span-1">
-            <div className="sticky top-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="sticky top-6 rounded-md border border-slate-200 bg-white p-6">
 
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-sm font-semibold text-slate-900">
                 Order Summary
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500">
                 Review your order before checkout.
               </p>
 
-              <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
+              <div className="mt-6 space-y-4 border-t border-slate-100 pt-6">
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600">
                     Total Items
                   </span>
@@ -375,7 +381,7 @@ function Cart() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600">
                     Delivery Fee
                   </span>
@@ -385,7 +391,7 @@ function Cart() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600">
                     Discount
                   </span>
@@ -395,11 +401,11 @@ function Cart() {
                   </span>
                 </div>
 
-                <div className="border-t border-dashed border-slate-200 pt-5">
+                <div className="border-t border-slate-100 pt-5">
 
                   <div className="flex items-center justify-between">
 
-                    <span className="text-lg font-semibold text-slate-900">
+                    <span className="text-base font-semibold text-slate-900">
                       Grand Total
                     </span>
 
@@ -415,14 +421,14 @@ function Cart() {
 
               <Link
                 to="/checkout"
-                className="mt-7 block w-full rounded-xl bg-accent px-4 py-3.5 text-center font-semibold text-white transition hover:opacity-90"
+                className="mt-7 block w-full cursor-pointer rounded bg-accent px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-secondary"
               >
                 Proceed to Checkout
               </Link>
 
               <button
                 onClick={() => navigate("/products")}
-                className="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="mt-3 w-full cursor-pointer rounded border border-slate-300 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition-colors hover:border-accent hover:text-accent"
               >
                 Continue Shopping
               </button>

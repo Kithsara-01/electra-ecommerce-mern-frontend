@@ -173,57 +173,54 @@ function EditProfile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
-
+  const inputClass =
+    "w-full rounded border border-slate-900/15 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent";
 
   return (
-    <div className="min-h-screen bg-primary px-6 py-10">
+    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-8">
 
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center gap-3 bg-white px-5 py-3 rounded-xl shadow-md hover:bg-gray-50 hover:shadow-lg transition duration-300 cursor-pointer"
+            className="flex cursor-pointer items-center gap-2.5 rounded border border-slate-900/15 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-accent hover:text-accent"
           >
-            <FaArrowLeft className="text-secondary" />
-
-            <span className="font-semibold text-secondary">
-              Back
-            </span>
+            <FaArrowLeft className="text-xs" />
+            <span>Back</span>
           </button>
 
-          <h1 className="text-4xl font-bold text-secondary">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Edit Profile
           </h1>
 
-          <div className="w-24"></div>
+          <div className="w-20"></div>
 
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Personal Information */}
-          <div className="bg-white rounded-3xl shadow-xl p-8">
+          <div className="rounded-md border border-slate-900/10 bg-white p-6">
 
-            <h2 className="text-2xl font-bold text-secondary mb-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-6">
               Personal Information
             </h2>
 
             {/* Profile Image */}
-            <div className="flex flex-col items-center mb-10">
+            <div className="flex flex-col items-center mb-8">
 
              <img
                 src={previewImage}
                 alt="Profile"
-                className="w-36 h-36 rounded-full border-4 border-accent shadow-lg object-cover"
+                className="w-32 h-32 rounded-full border-2 border-accent object-cover"
               />
 
-              <label className="mt-5 flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-full hover:bg-teal-700 transition duration-300 cursor-pointer">
+              <label className="mt-4 flex cursor-pointer items-center gap-2 rounded bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary">
 
-                <FaCamera />
+                <FaCamera className="text-xs" />
 
                 <span>Change Photo</span>
 
@@ -241,7 +238,7 @@ function EditProfile() {
             {/* Full Name */}
             <div>
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Full Name
               </label>
 
@@ -250,30 +247,30 @@ function EditProfile() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                className={inputClass}
               />
 
             </div>
 
             {/* Email */}
-            <div className="mt-6">
+            <div className="mt-4">
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Email
               </label>
 
               <input
                 type="email"
                 defaultValue={user?.email}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                className={inputClass}
               />
 
             </div>
 
             {/* Phone */}
-            <div className="mt-6">
+            <div className="mt-4">
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Phone Number
               </label>
 
@@ -284,15 +281,15 @@ function EditProfile() {
                 onChange={handleChange}
                 maxLength={10}
                 inputMode="numeric"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                className={inputClass}
               />
 
             </div>
 
             {/* Address */}
-            <div className="mt-6">
+            <div className="mt-4">
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Address
               </label>
 
@@ -301,22 +298,20 @@ function EditProfile() {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-accent"
+                className={`${inputClass} resize-none`}
               />
 
             </div>
 
             {/* Save Button */}
-            <div className="mt-8">
+            <div className="mt-6">
 
               <button
                 onClick={handleSubmit}
-                className="w-full bg-accent text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-teal-700 transition duration-300 cursor-pointer"
+                className="w-full cursor-pointer rounded bg-accent py-2.5 text-sm font-semibold text-white transition-colors flex items-center justify-center gap-2.5 hover:bg-secondary"
               >
-                <FaSave />
-
+                <FaSave className="text-xs" />
                 Save Changes
-
               </button>
 
             </div>
@@ -324,15 +319,16 @@ function EditProfile() {
           </div>
 
           {/* Security */}
-          <div className="bg-white rounded-3xl shadow-xl p-8">
+          <div className="rounded-md border border-slate-900/10 bg-white p-6">
 
-            <h2 className="text-2xl font-bold text-secondary mb-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-6">
               Change Password
             </h2>
-                        {/* Current Password */}
+
+            {/* Current Password */}
             <div>
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Current Password
               </label>
 
@@ -343,22 +339,15 @@ function EditProfile() {
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChangeInput}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className={`${inputClass} pr-11`}
                 />
 
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-accent"
                 >
-                  <button
-                    type="button"
-                    onClick={() =>
-                        setShowCurrentPassword(!showCurrentPassword)
-                    }
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
-                    >
-                    {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
+                  {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
 
               </div>
@@ -366,9 +355,9 @@ function EditProfile() {
             </div>
 
             {/* New Password */}
-            <div className="mt-6">
+            <div className="mt-4">
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 New Password
               </label>
 
@@ -380,20 +369,15 @@ function EditProfile() {
                   value={passwordData.newPassword}
                   onChange={handlePasswordChangeInput}
                   placeholder="Enter new password"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className={`${inputClass} pr-11`}
                 />
 
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-accent"
                 >
-                  <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
-                >
-                {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                  {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
 
               </div>
@@ -401,9 +385,9 @@ function EditProfile() {
             </div>
 
             {/* Confirm Password */}
-            <div className="mt-6">
+            <div className="mt-4">
 
-              <label className="block text-sm font-semibold text-secondary mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Confirm New Password
               </label>
 
@@ -415,20 +399,15 @@ function EditProfile() {
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChangeInput}
                   placeholder="Confirm new password"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className={`${inputClass} pr-11`}
                 />
 
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 transition-colors hover:text-accent"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition cursor-pointer"
-                    >
-                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
 
               </div>
@@ -436,33 +415,31 @@ function EditProfile() {
             </div>
 
             {/* Password Requirements */}
-            <div className="mt-6 rounded-xl bg-gray-50 border border-gray-200 p-4">
+            <div className="mt-5 rounded border border-slate-900/10 bg-slate-50 p-4">
 
-              <h3 className="font-semibold text-secondary mb-2">
-                To create Better password follow them,
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                To create a better password, follow these
               </h3>
 
-              <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-                <li>Use Minimum 8 characters</li>
-                <li>Use At least one uppercase letter</li>
-                <li>Use At least one lowercase letter</li>
-                <li>Use At least one number</li>
-                <li>Use At least one special character</li>
+              <ul className="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                <li>Use minimum 8 characters</li>
+                <li>Use at least one uppercase letter</li>
+                <li>Use at least one lowercase letter</li>
+                <li>Use at least one number</li>
+                <li>Use at least one special character</li>
               </ul>
 
             </div>
 
             {/* Update Password Button */}
-            <div className="mt-8">
+            <div className="mt-6">
 
               <button
                 onClick={handlePasswordSubmit}
-                className="w-full bg-secondary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-gray-900 transition duration-300 cursor-pointer"
+                className="w-full cursor-pointer rounded bg-secondary py-2.5 text-sm font-semibold text-white transition-colors flex items-center justify-center gap-2.5 hover:bg-slate-800"
               >
-                <FaLock />
-
+                <FaLock className="text-xs" />
                 Change Password
-
               </button>
 
             </div>

@@ -21,62 +21,71 @@ const ProductCard = ({ product }) => {
   return (
     <div
       onClick={() => navigate(`/products/${product?.productId}`)}
-      className="group cursor-pointer select-none overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-md border border-slate-200 bg-white transition-colors hover:border-accent"
     >
-      <div className="relative h-40 overflow-hidden bg-slate-100">
+      {/* Product Image */}
+      <div className="flex h-64 items-center justify-center bg-white">
         {imageUrl && !imageError ? (
           <img
             src={imageUrl}
             alt={product?.name || "Product"}
             loading="lazy"
             onError={() => setImageError(true)}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-contain p-3"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm font-medium text-slate-500">
+          <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
             No Image Available
           </div>
         )}
       </div>
 
-      <div className="space-y-3 p-3">
-        <div className="space-y-1.5">
-          <h3 className="line-clamp-2 text-base font-semibold text-slate-900">
-            {product?.name || "Product Name"}
-          </h3>
+      {/* Product Details */}
+      <div className="flex flex-1 flex-col border-t border-slate-100 px-3 py-3">
+        {/* Brand */}
+        <p className="text-xs text-slate-500">
+          {product?.brand || "N/A"}
+        </p>
 
-          <p className="text-sm text-slate-600">
-            <span className="font-medium text-slate-700">Brand:</span>{" "}
-            {product?.brand || "N/A"}
-          </p>
+        {/* Name */}
+        <h3 className="mt-0.5 line-clamp-2 text-sm font-medium text-slate-900">
+          {product?.name || "Product Name"}
+        </h3>
 
-          <p className="text-sm text-slate-600">
-            <span className="font-medium text-slate-700">Model:</span>{" "}
-            {product?.model || "N/A"}
-          </p>
-        </div>
-
-        <div className="flex items-end justify-between gap-2">
+        {/* Price & Stock */}
+        <div className="mt-2 flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-400 line-through">
-              {formatPrice(labelPrice)}
-            </p>
-
-            <p className="text-xl font-bold text-slate-900">
+            {labelPrice > sellingPrice && (
+              <p className="text-xs text-slate-400 line-through">
+                {formatPrice(labelPrice)}
+              </p>
+            )}
+            <p className="text-base font-semibold text-secondary">
               {formatPrice(sellingPrice)}
             </p>
           </div>
 
           <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+            className={`rounded px-2 py-0.5 text-[11px] font-medium ${
               isInStock
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-rose-100 text-rose-700"
+                ? "bg-accent/10 text-accent"
+                : "bg-rose-50 text-rose-700"
             }`}
           >
             {isInStock ? "In Stock" : "Out of Stock"}
           </span>
         </div>
+
+        {/* Button */}
+        <button
+          className="mt-3 w-full rounded border border-accent py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/products/${product?.productId}`);
+          }}
+        >
+          View Details
+        </button>
       </div>
     </div>
   );

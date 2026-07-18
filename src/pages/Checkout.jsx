@@ -407,45 +407,49 @@ function Checkout() {
   if (loading) {
     return (
       <>
-        <Header />
+        <Header showSearch={false} />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-[#2FA084]"></div>
-            <p className="text-gray-600">Loading checkout...</p>
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+            <p className="text-sm text-slate-600">Loading checkout...</p>
           </div>
         </div>
       </>
     );
   }
 
+  const inputClass = (hasError) =>
+    `w-full rounded border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors ${
+      hasError
+        ? "border-rose-400 focus:border-rose-400"
+        : "border-slate-200 focus:border-accent"
+    }`;
+
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
 
-      {/* Main Container */}
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="min-h-screen bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
           {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 md:text-5xl">
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
               Secure Checkout
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-sm text-slate-600">
               Please review your information before placing your order.
             </p>
           </div>
 
           {/* Content Grid */}
-          <div className="grid gap-8 lg:grid-cols-3 lg:gap-10">
+          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
             {/* LEFT SIDE - 2 COLUMNS */}
             <div className="lg:col-span-2 space-y-6">
               {/* ========== SECTION 1: CUSTOMER INFORMATION ========== */}
-              <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2FA084] bg-opacity-10">
-                    <FaUser className="text-lg text-[#2FA084]" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+              <div className="rounded-md border border-slate-200 bg-white p-6">
+                <div className="mb-5 flex items-center gap-2.5">
+                  <FaUser className="text-base text-accent" />
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
                     Customer Information
                   </h2>
                 </div>
@@ -453,8 +457,8 @@ function Checkout() {
                 <div className="space-y-4">
                   {/* Full Name */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Full Name <span className="text-red-500">*</span>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Full Name <span className="text-rose-500">*</span>
                     </label>
                     <input
                       ref={fullNameRef}
@@ -462,21 +466,17 @@ function Checkout() {
                       value={fullName}
                       onChange={(e) => handleFullNameChange(e.target.value)}
                       placeholder="Enter your full name"
-                      className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                        errors.fullName
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                      }`}
+                      className={inputClass(errors.fullName)}
                     />
                     {errors.fullName && (
-                      <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
+                      <p className="mt-1 text-xs text-rose-500">{errors.fullName}</p>
                     )}
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Email Address <span className="text-red-500">*</span>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Email Address <span className="text-rose-500">*</span>
                     </label>
                     <input
                       ref={emailRef}
@@ -484,21 +484,17 @@ function Checkout() {
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
                       placeholder="Enter your email"
-                      className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                        errors.email
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                      }`}
+                      className={inputClass(errors.email)}
                     />
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                      <p className="mt-1 text-xs text-rose-500">{errors.email}</p>
                     )}
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Phone Number <span className="text-red-500">*</span>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Phone Number <span className="text-rose-500">*</span>
                     </label>
                     <input
                       ref={phoneRef}
@@ -506,26 +502,20 @@ function Checkout() {
                       value={phone}
                       onChange={(e) => handlePhoneChange(e.target.value)}
                       placeholder="Enter your phone number"
-                      className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                        errors.phone
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                      }`}
+                      className={inputClass(errors.phone)}
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                      <p className="mt-1 text-xs text-rose-500">{errors.phone}</p>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* ========== SECTION 2: DELIVERY ADDRESS ========== */}
-              <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2FA084] bg-opacity-10">
-                    <FaMapMarkerAlt className="text-lg text-[#2FA084]" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+              <div className="rounded-md border border-slate-200 bg-white p-6">
+                <div className="mb-5 flex items-center gap-2.5">
+                  <FaMapMarkerAlt className="text-base text-accent" />
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
                     Delivery Address
                   </h2>
                 </div>
@@ -533,8 +523,8 @@ function Checkout() {
                 <div className="space-y-4">
                   {/* Street Address */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Street Address <span className="text-red-500">*</span>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Street Address <span className="text-rose-500">*</span>
                     </label>
                     <input
                       ref={streetAddressRef}
@@ -542,22 +532,18 @@ function Checkout() {
                       value={streetAddress}
                       onChange={(e) => handleStreetAddressChange(e.target.value)}
                       placeholder="e.g., 123 Main Street, Apt 4B"
-                      className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                        errors.streetAddress
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                      }`}
+                      className={inputClass(errors.streetAddress)}
                     />
                     {errors.streetAddress && (
-                      <p className="mt-1 text-sm text-red-500">{errors.streetAddress}</p>
+                      <p className="mt-1 text-xs text-rose-500">{errors.streetAddress}</p>
                     )}
                   </div>
 
                   {/* City and District Row */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
-                        City <span className="text-red-500">*</span>
+                      <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                        City <span className="text-rose-500">*</span>
                       </label>
                       <input
                         ref={cityRef}
@@ -565,29 +551,21 @@ function Checkout() {
                         value={city}
                         onChange={(e) => handleCityChange(e.target.value)}
                         placeholder="Enter your city"
-                        className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                          errors.city
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                        }`}
+                        className={inputClass(errors.city)}
                       />
                       {errors.city && (
-                        <p className="mt-1 text-sm text-red-500">{errors.city}</p>
+                        <p className="mt-1 text-xs text-rose-500">{errors.city}</p>
                       )}
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
-                        District <span className="text-red-500">*</span>
+                      <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                        District <span className="text-rose-500">*</span>
                       </label>
                       <select
                         ref={districtRef}
                         value={district}
                         onChange={(e) => handleDistrictChange(e.target.value)}
-                        className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                          errors.district
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                        }`}
+                        className={inputClass(errors.district)}
                       >
                         <option value="" disabled>
                           Select your district
@@ -619,15 +597,15 @@ function Checkout() {
                         <option value="Vavuniya">Vavuniya</option>
                       </select>
                       {errors.district && (
-                        <p className="mt-1 text-sm text-red-500">{errors.district}</p>
+                        <p className="mt-1 text-xs text-rose-500">{errors.district}</p>
                       )}
                     </div>
                   </div>
 
                   {/* Postal Code */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Postal Code <span className="text-red-500">*</span>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Postal Code <span className="text-rose-500">*</span>
                     </label>
                     <input
                       ref={postalCodeRef}
@@ -635,20 +613,16 @@ function Checkout() {
                       value={postalCode}
                       onChange={(e) => handlePostalCodeChange(e.target.value)}
                       placeholder="Enter postal code"
-                      className={`w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-opacity-20 ${
-                        errors.postalCode
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-200 focus:border-[#2FA084] focus:ring-[#2FA084]"
-                      }`}
+                      className={inputClass(errors.postalCode)}
                     />
                     {errors.postalCode && (
-                      <p className="mt-1 text-sm text-red-500">{errors.postalCode}</p>
+                      <p className="mt-1 text-xs text-rose-500">{errors.postalCode}</p>
                     )}
                   </div>
 
                   {/* Delivery Notes */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
                       Delivery Notes (Optional)
                     </label>
                     <textarea
@@ -656,50 +630,48 @@ function Checkout() {
                       value={deliveryNotes}
                       onChange={(e) => setDeliveryNotes(e.target.value)}
                       placeholder="Apartment, landmark, gate number or any delivery instructions (optional)"
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 transition focus:border-[#2FA084] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2FA084] focus:ring-opacity-20"
+                      className="w-full rounded border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-accent"
                     />
                   </div>
                 </div>
               </div>
 
               {/* ========== SECTION 3: PAYMENT METHOD ========== */}
-              <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2FA084] bg-opacity-10">
-                    <FaMoneyBillWave className="text-lg text-[#2FA084]" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Payment Method <span className="text-red-500">*</span>
+              <div className="rounded-md border border-slate-200 bg-white p-6">
+                <div className="mb-5 flex items-center gap-2.5">
+                  <FaMoneyBillWave className="text-base text-accent" />
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    Payment Method <span className="text-rose-500">*</span>
                   </h2>
                 </div>
 
                 <div className="space-y-3">
                   {/* Cash on Delivery */}
-                  <label className="relative flex cursor-pointer rounded-lg border-2 border-gray-200 p-4 transition hover:border-[#2FA084] hover:bg-[#2FA084] hover:bg-opacity-5">
+                  <label className="relative flex cursor-pointer rounded border border-slate-200 p-4 transition-colors hover:border-accent">
                     <input
                       type="radio"
                       name="payment"
                       value="Cash on Delivery"
                       checked={paymentMethod === "Cash on Delivery"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mt-1 h-5 w-5 cursor-pointer accent-[#2FA084]"
+                      className="mt-1 h-4 w-4 cursor-pointer accent-accent"
                     />
-                    <div className="ml-4 flex flex-1 flex-col">
-                      <span className="font-semibold text-gray-900">
+                    <div className="ml-3.5 flex flex-1 flex-col">
+                      <span className="text-sm font-semibold text-slate-900">
                         Cash On Delivery
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-slate-500">
                         Pay when your order arrives
                       </span>
-                      <span className="mt-1 text-xs font-medium text-[#2FA084]">
+                      <span className="mt-1 text-xs font-medium text-accent">
                         Recommended for Sri Lanka
                       </span>
                     </div>
                     {paymentMethod === "Cash on Delivery" && (
                       <div className="flex items-center">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2FA084]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent">
                           <svg
-                            className="h-4 w-4 text-white"
+                            className="h-3 w-3 text-white"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -717,38 +689,38 @@ function Checkout() {
                   </label>
 
                   {/* Credit / Debit Card */}
-                  <label className="relative flex cursor-not-allowed rounded-lg border-2 border-gray-100 p-4 opacity-50">
+                  <label className="relative flex cursor-not-allowed rounded border border-slate-100 p-4 opacity-50">
                     <input
                       type="radio"
                       name="payment"
                       value="Credit Card"
                       disabled
-                      className="mt-1 h-5 w-5 cursor-not-allowed accent-gray-400"
+                      className="mt-1 h-4 w-4 cursor-not-allowed accent-slate-400"
                     />
-                    <div className="ml-4 flex flex-1 flex-col">
-                      <span className="font-semibold text-gray-900">
+                    <div className="ml-3.5 flex flex-1 flex-col">
+                      <span className="text-sm font-semibold text-slate-900">
                         Credit / Debit Card
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs text-slate-500">
                         Coming Soon
                       </span>
                     </div>
                   </label>
 
                   {/* Bank Transfer */}
-                  <label className="relative flex cursor-not-allowed rounded-lg border-2 border-gray-100 p-4 opacity-50">
+                  <label className="relative flex cursor-not-allowed rounded border border-slate-100 p-4 opacity-50">
                     <input
                       type="radio"
                       name="payment"
                       value="Bank Transfer"
                       disabled
-                      className="mt-1 h-5 w-5 cursor-not-allowed accent-gray-400"
+                      className="mt-1 h-4 w-4 cursor-not-allowed accent-slate-400"
                     />
-                    <div className="ml-4 flex flex-1 flex-col">
-                      <span className="font-semibold text-gray-900">
+                    <div className="ml-3.5 flex flex-1 flex-col">
+                      <span className="text-sm font-semibold text-slate-900">
                         Bank Transfer
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs text-slate-500">
                         Coming Soon
                       </span>
                     </div>
@@ -757,21 +729,21 @@ function Checkout() {
               </div>
 
               {/* ========== TERMS & CONDITIONS ========== */}
-              <div className="flex items-start gap-4 rounded-2xl bg-[#2FA084] bg-opacity-5 p-6 ring-1 ring-[#2FA084] ring-opacity-20">
+              <div className="flex items-start gap-3.5 rounded-md border border-accent/20 bg-accent/5 p-5">
                 <input
                   ref={termsRef}
                   type="checkbox"
                   id="terms"
                   checked={agreeToTerms}
                   onChange={(e) => setAgreeToTerms(e.target.checked)}
-                  className="mt-1 h-5 w-5 cursor-pointer rounded accent-[#2FA084]"
+                  className="mt-1 h-4 w-4 cursor-pointer rounded accent-accent"
                 />
                 <label
                   htmlFor="terms"
-                  className="cursor-pointer text-sm text-gray-700"
+                  className="cursor-pointer text-sm text-slate-700"
                 >
                   I agree to the{" "}
-                  <span className="font-semibold text-[#2FA084]">
+                  <span className="font-semibold text-accent">
                     Terms & Conditions
                   </span>{" "}
                   and understand that my order will be processed as per our
@@ -783,7 +755,7 @@ function Checkout() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={placingOrder || !agreeToTerms}
-                className="w-full rounded-xl bg-[#2FA084] py-4 font-semibold text-white transition hover:bg-[#257d69] disabled:bg-gray-400 lg:hidden"
+                className="w-full cursor-pointer rounded bg-accent py-3.5 text-sm font-semibold text-white transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-slate-300 lg:hidden"
               >
                 {placingOrder ? "Processing..." : "Place Secure Order"}
               </button>
@@ -791,45 +763,43 @@ function Checkout() {
 
             {/* RIGHT SIDE - ORDER SUMMARY */}
             <div className="lg:col-span-1">
-              <div className="sticky top-4 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2FA084] bg-opacity-10">
-                    <FaShoppingCart className="text-lg text-[#2FA084]" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+              <div className="sticky top-4 rounded-md border border-slate-200 bg-white p-6">
+                <div className="mb-5 flex items-center gap-2.5">
+                  <FaShoppingCart className="text-base text-accent" />
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
                     Your Order
                   </h2>
                 </div>
 
                 {/* Products */}
-                <div className="mb-6 max-h-96 space-y-4 overflow-y-auto pr-2">
+                <div className="mb-5 max-h-96 space-y-3 overflow-y-auto pr-1">
                   {cartItems.map((item) => (
                     <div
                       key={item.productId._id}
-                      className="rounded-lg bg-gray-50 p-4"
+                      className="rounded border border-slate-100 p-3"
                     >
                       {/* Product Image */}
                       {item.productId.images && item.productId.images[0] && (
                         <img
                           src={item.productId.images[0]}
                           alt={item.productId.name}
-                          className="mb-3 h-32 w-full rounded-lg bg-white object-contain p-2"
+                          className="mb-3 h-28 w-full rounded bg-white object-contain p-2"
                         />
                       )}
 
                       {/* Product Name */}
-                      <p className="mb-2 font-medium text-gray-900">
+                      <p className="mb-2 text-sm font-medium text-slate-900">
                         {item.productId.name}
                       </p>
 
                       {/* Details Row */}
-                      <div className="mb-2 flex justify-between text-sm text-gray-600">
+                      <div className="mb-2 flex justify-between text-xs text-slate-500">
                         <span>Qty: {item.quantity}</span>
                         <span>{formatPrice(item.productId.price)}</span>
                       </div>
 
                       {/* Subtotal for Item */}
-                      <div className="flex justify-between border-t border-gray-200 pt-2 text-sm font-semibold text-gray-900">
+                      <div className="flex justify-between border-t border-slate-100 pt-2 text-xs font-semibold text-slate-900">
                         <span>Subtotal</span>
                         <span>
                           {formatPrice(
@@ -842,43 +812,43 @@ function Checkout() {
                 </div>
 
                 {/* Divider */}
-                <div className="mb-4 border-t-2 border-gray-100" />
+                <div className="mb-4 border-t border-slate-100" />
 
                 {/* Pricing Breakdown */}
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-slate-600">
                     <span>Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-slate-600">
                     <span>Delivery Fee</span>
                     <span>{formatPrice(deliveryFee)}</span>
                   </div>
 
-                  <div className="rounded-lg border border-accent/10 bg-accent/5 p-3">
+                  <div className="rounded border border-accent/20 bg-accent/5 p-3">
                     <p className="text-xs font-medium text-slate-500">
                       Estimated Delivery
                     </p>
 
-                    <p className="mt-1 font-semibold text-accent">
+                    <p className="mt-1 text-sm font-semibold text-accent">
                       {estimatedDelivery}
                     </p>
                   </div>
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-slate-600">
                     <span>Discount</span>
                     <span>{formatPrice(discount)}</span>
                   </div>
                 </div>
 
                 {/* Divider */}
-                <div className="my-4 border-t-2 border-gray-100" />
+                <div className="my-4 border-t border-slate-100" />
 
                 {/* Grand Total */}
                 <div className="mb-6 flex justify-between">
-                  <span className="text-lg font-semibold text-gray-900">
+                  <span className="text-base font-semibold text-slate-900">
                     Grand Total
                   </span>
-                  <span className="text-2xl font-bold text-[#2FA084]">
+                  <span className="text-2xl font-bold text-accent">
                     {formatPrice(grandTotal)}
                   </span>
                 </div>
@@ -887,7 +857,7 @@ function Checkout() {
                 <button
                   onClick={handlePlaceOrder}
                   disabled={placingOrder || !agreeToTerms}
-                  className="hidden w-full rounded-xl bg-[#2FA084] py-4 font-semibold text-white transition hover:bg-[#257d69] disabled:bg-gray-400 lg:block"
+                  className="hidden w-full cursor-pointer rounded bg-accent py-3 text-sm font-semibold text-white transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-slate-300 lg:block"
                 >
                   {placingOrder ? "Processing..." : "Place Secure Order"}
                 </button>

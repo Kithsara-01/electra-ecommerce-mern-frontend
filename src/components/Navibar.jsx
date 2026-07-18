@@ -36,56 +36,40 @@ function Navibar() {
   const formatBadgeNumber = (num) => {
     return num > 99 ? "99+" : num;
   };
+
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
+    { to: "/products", label: "Products" },
+    { to: "/contact", label: "Contact" },
+    { to: "/wishlist", label: "Wishlist" },
+  ];
+
   return (
-    <nav className="bg-primary border-b border-border">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <nav className="border-b border-slate-200 bg-primary">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
 
         {/* Logo */}
         <Link to="/" className="flex items-center">
           <img
             src={logo}
             alt="Electra Logo"
-            className="h-16 w-auto object-contain"
+            className="h-12 w-auto object-contain"
           />
         </Link>
 
         {/* Navigation Links */}
         <ul className="flex items-center gap-8">
-          <li>
-            <Link
-              to="/"
-              className="text-secondary hover:text-accent transition"
-            >
-              Home
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              to="/about"
-              className="text-secondary hover:text-accent transition"
-            >
-              About
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              to="/products"
-              className="text-secondary hover:text-accent transition"
-            >
-              Products
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              to="/contact"
-              className="text-secondary hover:text-accent transition"
-            >
-              Contact
-            </Link>
-          </li>
+          {navLinks.map((link) => (
+            <li key={link.to}>
+              <Link
+                to={link.to}
+                className="text-sm font-medium text-secondary transition-colors hover:text-accent"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
         </ul>
 
         {/* Authentication Section */}
@@ -94,14 +78,14 @@ function Navibar() {
             <>
               <Link
                 to="/login"
-                className="border border-accent px-4 py-2 rounded-lg text-accent hover:bg-accent hover:text-white transition"
+                className="cursor-pointer rounded border border-accent px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
               >
                 Login
               </Link>
 
               <Link
                 to="/customer-register"
-                className="bg-accent px-4 py-2 rounded-lg text-white hover:opacity-85 transition duration-300"
+                className="cursor-pointer rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-secondary"
               >
                 Register
               </Link>
@@ -110,12 +94,12 @@ function Navibar() {
             <>
               <Link
                 to="/cart"
-                className="relative flex items-center justify-center h-11 w-11 rounded-lg bg-slate-100 text-slate-600 hover:bg-accent hover:text-white transition duration-300"
+                className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent"
                 title="Shopping Cart"
               >
                 <FiShoppingCart className="text-lg" />
                 {cartQuantity > 0 && (
-                  <span className="absolute -top-2 -right-2 flex items-center justify-center min-h-5 min-w-5 rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                  <span className="absolute -top-2 -right-2 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-xs font-bold text-white">
                     {formatBadgeNumber(cartQuantity)}
                   </span>
                 )}
