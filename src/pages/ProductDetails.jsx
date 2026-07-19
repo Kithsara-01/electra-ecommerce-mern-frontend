@@ -2,16 +2,32 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 
 import Header from "../components/Header";
+import ReviewCard from "../components/ReviewCard";
+import StarRating from "../components/StarRating";
+import { useAuth } from "../context/AuthContext";
 import { getProductById } from "../services/productService";
 import { addToCart } from "../services/cartService";
 import {
-  addToWishlist, removeFromWishlist, checkWishlist,} from "../services/wishlistService";
+  getProductReviews,
+  createReview,
+  updateReview,
+  deleteReview,
+} from "../services/reviewService";
+
+
+import {
+  addToWishlist,
+  removeFromWishlist,
+  checkWishlist,
+} from "../services/wishlistService";
 
 function ProductDetails() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
@@ -20,6 +36,15 @@ function ProductDetails() {
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+
+  const hasUserReviewed = reviews.some(
+      (review) => review.customer?._id === user?._id
+    );
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -49,7 +74,20 @@ function ProductDetails() {
     };
 
     fetchProduct();
+    fetchReviews();
   }, [productId]);
+
+  const fetchReviews = async () => {
+        try {
+          const response = await getProductReviews(productId);
+          setReviews(response.reviews);
+        } catch (error) {
+          toast.error(
+            error.response?.data?.message || "Failed to load reviews."
+          );
+        }
+      };
+
 
   const formatPrice = (price) =>
     new Intl.NumberFormat("en-LK", {
@@ -57,6 +95,8 @@ function ProductDetails() {
       currency: "LKR",
       maximumFractionDigits: 0,
     }).format(price || 0);
+
+      
 
   const handleAddToCart = async () => {
     try {
@@ -96,6 +136,100 @@ function ProductDetails() {
       }
     };
 
+
+    const handleSubmitReview = async () => {
+
+        if (!user) {
+            toast.error("Please login to submit a review.");
+            navigate("/login");
+            return;
+          }
+
+          if (!comment.trim()) {
+            toast.error("Please write your review.");
+            return;
+          }
+
+          if (comment.trim().length < 10) {
+            toast.error("Review must contain at least 10 characters.");
+            return;
+          }
+
+          if (comment.trim().length > 500) {
+            toast.error("Review cannot exceed 500 characters.");
+            return;
+          }
+      try {
+        setReviewLoading(true);
+
+        const reviewData = {
+          productId: product.productId,
+          rating,
+          comment,
+        };
+
+        if (editingReviewId) {
+          await updateReview(editingReviewId, reviewData);
+          toast.success("Review updated successfully.");
+        } else {
+          await createReview(reviewData);
+          toast.success("Review added successfully.");
+        }
+
+        setComment("");
+        setRating(5);
+        setEditingReviewId(null);
+
+        fetchReviews();
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Failed to save review."
+        );
+      } finally {
+        setReviewLoading(false);
+      }
+    };
+
+
+    const handleEditReview = (review) => {
+      setEditingReviewId(review._id);
+      setRating(review.rating);
+      setComment(review.comment);
+
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    };
+
+
+    const handleDeleteReview = async (id) => {
+      const result = await Swal.fire({
+        title: "Delete Review?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Yes, Delete",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        await deleteReview(id);
+
+        toast.success("Review deleted successfully.");
+
+        fetchReviews();
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Failed to delete review."
+        );
+      }
+    };
 
     const handleWishlist = async () => {
       try {
@@ -268,6 +402,24 @@ function ProductDetails() {
                 <h2 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
                   {formatPrice(product.price)}
                 </h2>
+
+                
+
+                <div className="mt-3 flex items-center gap-3">
+                  <StarRating
+                    rating={Math.round(product.averageRating || 0)}
+                    readOnly
+                    size={18}
+                  />
+
+                  <span className="text-sm text-slate-600">
+                    {(product.averageRating || 0).toFixed(1)}
+                  </span>
+
+                  <span className="text-sm text-slate-400">
+                    ({product.totalReviews || 0} Reviews)
+                  </span>
+                </div>
               </div>
 
               <div className="mt-4">
@@ -330,6 +482,90 @@ function ProductDetails() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+
+        <div className="mt-10 rounded-md border border-slate-200 bg-white p-6">
+          <h2 className="mb-6 text-2xl font-semibold">
+            Customer Reviews
+          </h2>
+
+          {!user ? (
+            <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm text-amber-700">
+                Please login to write a review.
+              </p>
+            </div>
+          ) : hasUserReviewed && !editingReviewId ? (
+            <div className="rounded-md border border-blue-200 bg-blue-50 p-4">
+              <p className="text-sm text-blue-700">
+                You have already reviewed this product.
+                <br />
+                Use the Edit button below if you want to update your review.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">
+                  Your Rating
+                </label>
+
+                <StarRating
+                  rating={rating}
+                  onChange={setRating}
+                />
+              </div>
+
+              <textarea
+                rows={4}
+                value={comment}
+                maxLength={500}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Write your review..."
+                className="w-full rounded border p-3"
+              />
+
+              <div className="mt-1 text-right text-xs text-slate-500">
+                {comment.length}/500
+              </div>
+
+              <button
+                onClick={handleSubmitReview}
+                disabled={reviewLoading}
+                className="rounded bg-accent px-5 py-2 text-white"
+              >
+                {reviewLoading
+                  ? editingReviewId
+                    ? "Updating..."
+                    : "Submitting..."
+                  : editingReviewId
+                  ? "Update Review"
+                  : "Submit Review"}
+              </button>
+            </div>
+          )}
+
+          <hr className="my-8" />
+
+          <div className="space-y-5">
+            {reviews.length === 0 ? (
+              <p className="text-slate-500">
+                No reviews yet.
+              </p>
+            ) : (
+              reviews.map((review) => (
+                <ReviewCard
+                  key={review._id}
+                  review={review}
+                  currentUser={user}
+                  onEdit={handleEditReview}
+                  onDelete={handleDeleteReview}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

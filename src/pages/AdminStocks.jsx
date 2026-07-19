@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import { getAllAdminProducts, updateProductStock} from "../services/productService";
 
@@ -7,11 +7,24 @@ import UpdateStockModal from "../components/UpdateStockModal";
 import Swal from "sweetalert2";
 
 function AdminStocks() {
-  // const navigate = useNavigate();
+  
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState(() => {
+  const value = searchParams.get("filter");
+      if (value === "low-stock") {
+        return "Low Stock";
+      }
+
+      if (value === "out-of-stock") {
+        return "Out of Stock";
+      }
+
+      return "All";
+    });
+
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,6 +45,18 @@ function AdminStocks() {
 
   return () => clearTimeout(timer);
 }, [searchTerm]);
+
+useEffect(() => {
+  const value = searchParams.get("filter");
+
+      if (value === "low-stock") {
+        setFilter("Low Stock");
+        setCurrentPage(1);
+      } else if (value === "out-of-stock") {
+        setFilter("Out of Stock");
+        setCurrentPage(1);
+      }
+    }, [searchParams]);
 
 useEffect(() => {
   fetchProducts(currentPage);

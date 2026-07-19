@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.css";
@@ -9,6 +9,7 @@ import { getAllOrders, updateOrderStatus } from "../services/orderService";
 import { FaSearch } from "react-icons/fa";
 
 function AdminOrders() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,9 @@ function AdminOrders() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [selectedFilter, setSelectedFilter] = useState(
+    searchParams.get("status") || "All"
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -32,6 +35,15 @@ function AdminOrders() {
 
       return () => clearTimeout(timer);
     }, [searchTerm]);
+
+    useEffect(() => {
+      const status = searchParams.get("status");
+
+      if (status) {
+        setSelectedFilter(status);
+        setCurrentPage(1);
+      }
+    }, [searchParams]);
 
 
     useEffect(() => {

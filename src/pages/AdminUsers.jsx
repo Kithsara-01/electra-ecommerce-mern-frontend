@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FaSearch, FaUsers, FaLock, FaLockOpen, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
@@ -7,12 +8,15 @@ import AdminLayout from "../components/AdminLayout";
 import {getAllUsers, blockUser, unblockUser} from "../services/userService";
 
 function AdminUsers() {
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState(
+    searchParams.get("role") || "all"
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -91,6 +95,15 @@ function AdminUsers() {
       });
     }
   };
+
+  useEffect(() => {
+    const role = searchParams.get("role");
+
+    if (role) {
+      setRoleFilter(role);
+      setCurrentPage(1);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchUsers();
