@@ -107,7 +107,7 @@ function AdminDashboard() {
       title: "Revenue",
       value: `Rs. ${(stats.totalRevenue || 0).toLocaleString()}`,
       icon: <FaDollarSign size={22} />,
-      scrollTo: "revenue-chart",
+      path: "/admin/revenue"
     },
   ];
 

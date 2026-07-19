@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.css";
+import { FaCircleExclamation, FaEnvelope, FaRotateRight } from "react-icons/fa6";
 
 import Header from "../components/Header";
 import { useNotification } from "../context/NotificationContext";
@@ -28,7 +29,6 @@ function MyMessages() {
 
       setMessages(response.messages || []);
       await loadUnreadReplyCount();
-      
     } catch (err) {
       const message =
         err.response?.data?.message || "Failed to load your messages.";
@@ -65,6 +65,7 @@ function MyMessages() {
     Replied: "bg-accent/10 text-accent",
   };
 
+  // ---- Loading state ----
   if (loading) {
     return (
       <>
@@ -111,6 +112,7 @@ function MyMessages() {
     );
   }
 
+  // ---- Error state ----
   if (error) {
     return (
       <>
@@ -118,19 +120,30 @@ function MyMessages() {
 
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="rounded border border-rose-200 bg-rose-50 p-10 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
+              <FaCircleExclamation className="h-7 w-7 text-rose-600" />
+            </div>
+
             <h2 className="text-xl font-semibold text-slate-900">
               Unable to load messages
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
-              {error}
-            </p>
+            <p className="mt-2 text-sm text-slate-500">{error}</p>
+
+            <button
+              onClick={fetchMessages}
+              className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-md border border-rose-300 bg-white px-4 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-100"
+            >
+              <FaRotateRight size={13} />
+              Try Again
+            </button>
           </div>
         </div>
       </>
     );
   }
 
+  // ---- Empty state ----
   if (messages.length === 0) {
     return (
       <>
@@ -164,12 +177,21 @@ function MyMessages() {
             <p className="mt-2 text-sm text-slate-500">
               Messages you send from the Contact page will appear here.
             </p>
+
+            <button
+              onClick={() => navigate("/contact")}
+              className="mt-5 cursor-pointer rounded-md border border-accent bg-white px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+            >
+              Go to Contact Page
+            </button>
           </div>
         </div>
       </>
     );
   }
-    return (
+
+  // ---- Messages list ----
+  return (
     <>
       <Header showSearch={false} />
 
@@ -185,7 +207,7 @@ function MyMessages() {
             </h1>
           </div>
 
-          <div className="rounded border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
+          <div className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
             {messages.length} {messages.length === 1 ? "Message" : "Messages"}
           </div>
         </div>
@@ -201,51 +223,55 @@ function MyMessages() {
                 key={item._id}
                 className="rounded border border-slate-200 bg-white p-5 transition-colors hover:border-accent"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-3 flex flex-wrap items-center gap-3">
-                      <h2 className="truncate text-lg font-semibold text-slate-900">
-                        {item.subject}
-                      </h2>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
-                        >
-                          {status}
-                        </span>
-
-                        {item.hasUnreadAdminReply && (
-                          <span className="inline-flex rounded-full bg-rose-500 px-3 py-1 text-xs font-semibold text-white">
-                            New Reply
-                          </span>
-                        )}
-                      </div>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 flex-1 gap-4">
+                    <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent sm:flex">
+                      <FaEnvelope size={16} />
                     </div>
 
-                    <p className="line-clamp-2 text-sm leading-6 text-slate-600">
-                      {item.message}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <h2 className="truncate text-lg font-semibold text-slate-900">
+                          {item.subject}
+                        </h2>
 
-                    <div className="mt-4 flex flex-wrap gap-6 text-sm text-slate-500">
-                      <span>
-                        <strong className="text-slate-700">Date :</strong>{" "}
-                        {formatDate(item.createdAt)}
-                      </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
+                          >
+                            {status}
+                          </span>
 
-                      <span>
-                        <strong className="text-slate-700">Replies :</strong>{" "}
-                        {item.replies?.length || 0}
-                      </span>
+                          {item.hasUnreadAdminReply && (
+                            <span className="inline-flex rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold text-white">
+                              New Reply
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+                        {item.message}
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-6 text-sm text-slate-500">
+                        <span>
+                          <strong className="text-slate-700">Date :</strong>{" "}
+                          {formatDate(item.createdAt)}
+                        </span>
+
+                        <span>
+                          <strong className="text-slate-700">Replies :</strong>{" "}
+                          {item.replies?.length || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center">
+                  <div className="flex items-center lg:pl-4">
                     <button
-                      onClick={() =>
-                        navigate(`/my-messages/${item._id}`)
-                      }
-                      className="cursor-pointer rounded-md border border-accent bg-white px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+                      onClick={() => navigate(`/my-messages/${item._id}`)}
+                      className="w-full cursor-pointer rounded-md border border-accent bg-white px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white lg:w-auto"
                     >
                       View Conversation
                     </button>
