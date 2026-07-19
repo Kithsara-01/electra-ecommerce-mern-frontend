@@ -21,13 +21,9 @@ function AdminProfileDropdown() {
 
   const adminName = user?.name || "Admin";
 
-
-
-const adminImage = user?.profileImage
-  ? `${user.profileImage}?t=${Date.now()}`
-  : defaultProfile;
-
-////////
+  const adminImage = user?.profileImage
+    ? `${user.profileImage}?t=${Date.now()}`
+    : defaultProfile;
 
   const menuItems = [
     {
@@ -73,61 +69,48 @@ const adminImage = user?.profileImage
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-4 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary transition duration-200"
+        className="flex cursor-pointer items-center gap-4 rounded-md px-3 py-2 transition-colors hover:bg-slate-100"
       >
         <img
           src={adminImage}
           alt={adminName}
-          className="h-14 w-14 rounded-full object-cover border-2 border-border hover:border-accent transition duration-200"        />
+          className="h-12 w-12 rounded-full border-2 border-slate-200 object-cover transition-colors hover:border-accent"
+        />
 
         <div className="text-right">
-          <p className="text-base font-semibold text-secondary">
-            {adminName}
-          </p>
+          <p className="text-sm font-semibold text-slate-900">{adminName}</p>
 
-          <p className="text-sm text-gray-500">
-            Admin
-          </p>
+          <p className="text-xs text-slate-500">Admin</p>
         </div>
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl border border-border shadow-lg overflow-hidden z-50">
-
+        <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded border border-slate-200 bg-white">
           {/* Menu Items */}
           {menuItems.map((item) => (
             <button
               key={item.label}
               type="button"
               onClick={() => handleMenuClick(item.path)}
-              className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-secondary hover:bg-primary transition duration-200"
+              className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
             >
-              <span className="text-accent">
-                {item.icon}
-              </span>
-
-              <span>
-                {item.label}
-              </span>
+              <span className="text-accent">{item.icon}</span>
+              <span>{item.label}</span>
             </button>
           ))}
 
-          <hr className="border-border" />
+          <hr className="border-slate-100" />
 
           {/* Logout */}
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-red-600 hover:bg-red-50 transition duration-200"
+            className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left text-sm text-rose-600 transition-colors hover:bg-rose-50"
           >
             <FaSignOutAlt />
-
-            <span className="font-medium">
-              Logout
-            </span>
+            <span className="font-medium">Logout</span>
           </button>
-
         </div>
       )}
     </div>
