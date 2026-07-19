@@ -147,6 +147,16 @@ function AdminOrders() {
     });
   };
 
+  const sortedOrders = [...orders].sort((a, b) => {
+  const aPending = a.orderStatus === "Pending";
+  const bPending = b.orderStatus === "Pending";
+
+    if (aPending && !bPending) return -1;
+    if (!aPending && bPending) return 1;
+
+    return 0;
+  });
+
   
   const FILTERS = [
       "All",
@@ -164,6 +174,9 @@ function AdminOrders() {
 
       return orders.filter((order) => order.orderStatus === status).length;
     };
+    const pendingOrdersCount = orders.filter(
+      (order) => order.orderStatus === "Pending"
+    ).length;
 
   if (loading) {
     return (
@@ -209,6 +222,14 @@ function AdminOrders() {
           </span>
         </div>
         <div className="relative mb-5">
+          {pendingOrdersCount > 0 && (
+          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-sm font-medium text-amber-700">
+              ⚠ {pendingOrdersCount} pending order
+              {pendingOrdersCount > 1 ? "s require" : " requires"} attention.
+            </p>
+          </div>
+        )}
 
           <FaSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
 
@@ -255,19 +276,33 @@ function AdminOrders() {
               </tr>
             </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
-            {orders.length > 0 ? (
-              orders.map((order) => {
+            {sortedOrders.length > 0 ? (
+              sortedOrders.map((order) => {
                 const currentStatus = order.orderStatus || "Pending";
                 const allowedStatuses = getAllowedStatuses(currentStatus);
 
                 return (
-                  <tr key={order._id} className="hover:bg-slate-50">
+                  <tr
+                    key={order._id}
+                    className="transition hover:bg-slate-50"
+                  >
                     <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-slate-900">
                       #{order._id?.slice(-8).toUpperCase()}
                     </td>
 
-                    <td className="px-4 py-4 text-sm text-slate-700">
-                      {order.customerName || "N/A"}
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        {currentStatus === "Pending" && (
+                          <span
+                            className="h-2.5 w-2.5 rounded-full bg-red-500 flex-shrink-0"
+                            title="Pending Order"
+                          ></span>
+                        )}
+
+                        <span className="text-sm text-slate-700">
+                          {order.customerName || "N/A"}
+                        </span>
+                      </div>
                     </td>
 
                     <td className="px-4 py-4 text-sm text-slate-700">

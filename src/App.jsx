@@ -1,12 +1,14 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { AdminNotificationProvider } from "./context/AdminNotificationContext";
 
 import HomePage from "./pages/HomePage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+
 
 import CustomerRegister from "./pages/CustomerRegister";
 
@@ -34,8 +36,20 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminOrders from "./pages/AdminOrders";
 import AdminOrderDetails from "./pages/AdminOrderDetails";
 import AdminStocks from "./pages/AdminStocks";
+import AdminRevenue from "./pages/AdminRevenue";
 import CustomerCare from "./pages/CustomerCare";
 import CustomerCareDetails from "./pages/CustomerCareDetails";
+
+// Scopes AdminNotificationProvider to just the /admin* route tree, so the
+// sidebar badge context (and its fetch/poll) never runs on public or
+// customer pages.
+function AdminSection() {
+  return (
+    <AdminNotificationProvider>
+      <Outlet />
+    </AdminNotificationProvider>
+  );
+}
 
 function App() {
   return (
@@ -95,22 +109,27 @@ function App() {
 
         
 
-        {/* Admin */}
-        <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/stocks" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminStocks /></ProtectedRoute>} />
-        <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProfile /></ProtectedRoute>} />
-        <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProfile /></ProtectedRoute>} />
-        <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProducts /></ProtectedRoute>} />
-        <Route path="/admin/products/add" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminAddProduct /></ProtectedRoute>} />
-        <Route path="/admin/products/edit/:productId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProduct /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminUsers /></ProtectedRoute>} />
-        <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrders /></ProtectedRoute>} />
-        <Route path="/admin/orders/:orderId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrderDetails /></ProtectedRoute>} />
-        <Route path="/admin/customer-care" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCare /> </ProtectedRoute>}/>
-        <Route path="/admin/customer-care/:id" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCareDetails />
-    </ProtectedRoute>
-  }
-/>
+        {/* Admin — all nested under AdminSection so they share one
+            AdminNotificationProvider instance (one fetch/poll, live-updated
+            badge counts across every admin page). */}
+        <Route element={<AdminSection />}>
+          <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/revenue" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminRevenue /> </ProtectedRoute> }/>
+          <Route path="/admin/stocks" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminStocks /></ProtectedRoute>} />
+          <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProfile /></ProtectedRoute>} />
+          <Route path="/admin/edit-profile" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProfile /></ProtectedRoute>} />
+          <Route path="/admin/products" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/products/add" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminAddProduct /></ProtectedRoute>} />
+          <Route path="/admin/products/edit/:productId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminEditProduct /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminUsers /></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/orders/:orderId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrderDetails /></ProtectedRoute>} />
+          <Route path="/admin/customer-care" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCare /> </ProtectedRoute>}/>
+          <Route path="/admin/customer-care/:id" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCareDetails />
+      </ProtectedRoute>
+    }
+  />
+        </Route>
 
       </Routes>
     </>

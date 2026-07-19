@@ -15,59 +15,77 @@ const formatReviewDate = (date) => {
   return reviewDate.toLocaleDateString();
 };
 
-function ReviewCard({
-  review,
-  currentUser,
-  onEdit,
-  onDelete,
-}) {
-  const isOwner =
-    currentUser && review.customer?._id === currentUser._id;
+const getInitials = (name) => {
+  if (!name) return "A";
+
+  const parts = name.trim().split(/\s+/);
+  const initials =
+    parts.length > 1
+      ? `${parts[0][0]}${parts[parts.length - 1][0]}`
+      : parts[0].slice(0, 2);
+
+  return initials.toUpperCase();
+};
+
+function ReviewCard({ review, currentUser, onEdit, onDelete }) {
+  const isOwner = currentUser && review.customer?._id === currentUser._id;
+
+  const wasEdited =
+    review.updatedAt &&
+    new Date(review.updatedAt).getTime() - new Date(review.createdAt).getTime() > 60000;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded border border-slate-300 bg-white p-5 transition-colors hover:border-accent">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">
-                {(review.customer?.name || "A").charAt(0).toUpperCase()}
-              </div>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">
+            {getInitials(review.customer?.name)}
+          </div>
 
-              <div>
-                <h3 className="text-base font-semibold text-slate-800">
-                  {review.customer?.name || "Anonymous"}
-                </h3>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-semibold text-slate-900">
+                {review.customer?.name || "Anonymous"}
+              </h3>
 
-                <p className="text-sm text-slate-500">
-                  {formatReviewDate(review.createdAt)}
-                </p>
-              </div>
+              {review.verifiedPurchase && (
+                <span className="rounded-md bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+                  Verified Purchase
+                </span>
+              )}
             </div>
+
+            <p className="text-sm text-slate-500">
+              {formatReviewDate(review.createdAt)}
+              {wasEdited && <span className="text-slate-400"> · Edited</span>}
+            </p>
+          </div>
         </div>
 
-        <StarRating
-            rating={review.rating}
-            readOnly
-            size={18}
-          />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <StarRating rating={review.rating} readOnly size={18} />
+          <span className="text-sm font-medium text-slate-600">
+            {review.rating?.toFixed(1)}
+          </span>
+        </div>
       </div>
 
-      <p className="mt-5 leading-7 text-slate-600">
+      <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
         {review.comment}
       </p>
 
       {isOwner && (
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-4">
           <button
             onClick={() => onEdit(review)}
-            className="rounded-md border border-accent px-4 py-2 text-sm font-medium text-accent transition hover:bg-accent hover:text-white"
+            className="cursor-pointer rounded-md border border-accent px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
           >
             Edit
           </button>
 
           <button
             onClick={() => onDelete(review._id)}
-            className="rounded-md border border-red-500 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-500 hover:text-white"
+            className="cursor-pointer rounded-md border border-rose-300 px-4 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50"
           >
             Delete
           </button>

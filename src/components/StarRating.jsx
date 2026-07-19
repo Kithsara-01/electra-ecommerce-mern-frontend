@@ -14,18 +14,17 @@ function StarRating({
           type="button"
           disabled={readOnly}
           onClick={() => !readOnly && onChange(star)}
-          className={`transition-transform ${
+          aria-label={`${star} star${star > 1 ? "s" : ""}`}
+          className={
             readOnly
               ? "cursor-default"
-              : "cursor-pointer hover:scale-110"
-          }`}
+              : "cursor-pointer transition-opacity hover:opacity-70"
+          }
         >
           <FaStar
             size={size}
             className={
-              star <= rating
-                ? "text-yellow-400"
-                : "text-slate-300"
+              star <= rating ? "text-amber-400" : "text-slate-300"
             }
           />
         </button>
