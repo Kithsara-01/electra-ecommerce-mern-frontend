@@ -18,7 +18,7 @@ function AdminRevenue() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("monthly");
 
- useEffect(() => {
+  useEffect(() => {
     fetchRevenueAnalytics();
   }, [filter]);
 
@@ -28,7 +28,6 @@ function AdminRevenue() {
 
       setSummary(data.summary);
       setMonthlyRevenue(data.monthlyRevenue);
-      console.table(data.productRevenue);///////////
       setProductRevenue(data.productRevenue);
     } catch (error) {
       console.error(error);
@@ -37,11 +36,34 @@ function AdminRevenue() {
     }
   };
 
+  const summaryCards = [
+    {
+      label: "Total Revenue",
+      value: `Rs. ${summary.totalRevenue.toLocaleString()}`,
+      icon: <FaMoneyBillWave size={18} />,
+    },
+    {
+      label: "Today's Revenue",
+      value: `Rs. ${summary.todayRevenue.toLocaleString()}`,
+      icon: <FaCalendarDay size={18} />,
+    },
+    {
+      label: "Total Orders",
+      value: summary.totalOrders,
+      icon: <FaShoppingCart size={18} />,
+    },
+  ];
+
   if (loading) {
     return (
       <AdminLayout title="Revenue Analytics">
-        <div className="rounded-xl bg-white p-10 text-center shadow">
-          Loading...
+        <div className="rounded border border-slate-200 bg-white p-10 text-center">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Loading revenue analytics...
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Please wait while we crunch the numbers.
+          </p>
         </div>
       </AdminLayout>
     );
@@ -51,160 +73,130 @@ function AdminRevenue() {
     <AdminLayout title="Revenue Analytics">
       <div className="space-y-6">
         {/* Summary Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-xl bg-white p-6 shadow">
-            <FaMoneyBillWave className="mb-3 text-3xl text-green-600" />
-
-            <p className="text-gray-500">Total Revenue</p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Rs. {summary.totalRevenue.toLocaleString()}
-            </h2>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 shadow">
-            <FaCalendarDay className="mb-3 text-3xl text-blue-600" />
-
-            <p className="text-gray-500">Today's Revenue</p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Rs. {summary.todayRevenue.toLocaleString()}
-            </h2>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 shadow">
-            <FaShoppingCart className="mb-3 text-3xl text-purple-600" />
-
-            <p className="text-gray-500">Total Orders</p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              {summary.totalOrders}
-            </h2>
-          </div>
-        </div>
-
-        {/* Revenue Chart */}
-          <div className="rounded-xl bg-white p-6 shadow">
-            <div className="mb-6 flex items-center justify-between">
+        <div className="grid gap-4 md:grid-cols-3">
+          {summaryCards.map((card) => (
+            <div
+              key={card.label}
+              className="flex items-center justify-between rounded border border-slate-200 bg-white p-6"
+            >
               <div>
-                <h2 className="text-xl font-semibold">
-                  Revenue Analytics
-                </h2>
-
-                <p className="text-sm text-gray-500">
-                  Revenue generated over time
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  {card.label}
                 </p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                  {card.value}
+                </h2>
               </div>
 
-             <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#2FA084]"
-              >
-                <option value="daily">Daily</option>
-                <option value="monthly">Monthly</option>
-              </select>
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
+                {card.icon}
+              </div>
             </div>
+          ))}
+        </div>
 
-            <RevenueChart data={monthlyRevenue} />
-          </div>
+        {/* Revenue Chart — the filter dropdown lives inside the chart's own
+            header instead of a second wrapping card with a duplicate title */}
+        <RevenueChart
+          data={monthlyRevenue}
+          headerAction={
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="cursor-pointer rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-accent"
+            >
+              <option value="daily">Daily</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          }
+        />
 
-        <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="mb-4 text-xl font-semibold">
-                Revenue by Product
-            </h2>
+        {/* Revenue by Product */}
+        <div className="rounded border border-slate-200 bg-white p-6">
+          <h2 className="mb-5 text-lg font-bold text-slate-900">
+            Revenue by Product
+          </h2>
 
-            {productRevenue.length === 0 ? (
-                <p className="text-gray-500">
-                No revenue data available.
-                </p>
-            ) : (
-                <div className="overflow-x-auto">
+          {productRevenue.length === 0 ? (
+            <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-slate-300">
+              <p className="text-sm text-slate-500">No revenue data available.</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded border border-slate-200">
+              <div className="overflow-x-auto">
                 <table className="min-w-full">
-                    <thead className="border-b bg-gray-100">
-                    <tr>
-                        <th className="px-4 py-3 text-left">Product</th>
-
-                        <th className="px-4 py-3 text-center">
-                            Sold
-                        </th>
-
-                        <th className="px-4 py-3 text-right">
-                            Unit Price
-                        </th>
-
-                        <th className="px-4 py-3 text-right">
-                            Revenue
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                            Share
-                        </th>
+                  <thead className="bg-slate-50">
+                    <tr className="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <th className="px-5 py-3">Product</th>
+                      <th className="px-5 py-3 text-center">Sold</th>
+                      <th className="px-5 py-3 text-right">Unit Price</th>
+                      <th className="px-5 py-3 text-right">Revenue</th>
+                      <th className="px-5 py-3 text-center">Share</th>
                     </tr>
-                    </thead>
+                  </thead>
 
-                    <tbody>
+                  <tbody className="divide-y divide-slate-100">
                     {productRevenue.map((item) => (
-                        <tr
+                      <tr
                         key={item._id}
-                        className="border-b hover:bg-gray-50"
-                        >
-                        <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                            <img
+                        className="transition-colors hover:bg-slate-50"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white p-1">
+                              <img
                                 src={item.image}
                                 alt={item.name}
-                                className="h-12 w-12 rounded-lg border object-cover"
+                                loading="lazy"
                                 onError={(e) => {
-                                    console.log("Image failed:", item.image);
-
-                                    e.target.src =
-                                    "https://placehold.co/80x80?text=No+Image";
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src =
+                                    "https://placehold.co/80x80/FFFFFF/94A3B8?text=No+Image";
                                 }}
-                                />
-
-                            <span>{item.name}</span>
-                            </div>
-                        </td>
-
-                        <td className="px-4 py-3 text-center">
-                            {item.quantitySold}
-                        </td>
-
-                        <td className="px-4 py-3 text-right">
-                            Rs. {item.unitPrice?.toLocaleString()}
-                        </td>
-
-                        <td className="px-4 py-3 text-right font-semibold text-green-600">
-                            Rs. {item.revenue.toLocaleString()}
-                        </td>
-
-                        <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
-                            <div
-                                className="h-full rounded-full bg-green-500"
-                                style={{
-                                width: `${item.revenuePercentage}%`,
-                                }}
-                            />
+                                className="h-full w-full object-contain"
+                              />
                             </div>
 
-                            <span className="min-w-[55px] text-right text-sm font-medium">
-                            {item.revenuePercentage}%
+                            <span className="text-sm font-medium text-slate-900">
+                              {item.name}
                             </span>
-                        </div>
+                          </div>
                         </td>
 
+                        <td className="px-5 py-4 text-center text-sm text-slate-700">
+                          {item.quantitySold}
+                        </td>
 
+                        <td className="px-5 py-4 text-right text-sm text-slate-700">
+                          Rs. {item.unitPrice?.toLocaleString()}
+                        </td>
 
-                        </tr>
+                        <td className="px-5 py-4 text-right text-sm font-semibold text-accent">
+                          Rs. {item.revenue.toLocaleString()}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                              <div
+                                className="h-full rounded-full bg-accent"
+                                style={{ width: `${item.revenuePercentage}%` }}
+                              />
+                            </div>
+
+                            <span className="min-w-[45px] text-right text-sm font-medium text-slate-700">
+                              {item.revenuePercentage}%
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
                     ))}
-                    </tbody>
+                  </tbody>
                 </table>
-                </div>
-            )}
+              </div>
             </div>
+          )}
+        </div>
       </div>
     </AdminLayout>
   );
