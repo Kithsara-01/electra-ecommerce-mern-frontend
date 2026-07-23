@@ -5,6 +5,44 @@ import AdminLayout from "../components/AdminLayout";
 import { getProductById, updateProduct } from "../services/productService";
 import { uploadProductImages } from "../services/supabaseProductService";
 
+// Shared input classes — same as AdminAddProduct, so both forms look and
+// behave identically.
+const fieldClass = (disabled = false) =>
+  `w-full rounded-md border px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent ${
+    disabled
+      ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-500"
+      : "border-slate-200 text-slate-900"
+  }`;
+
+function FieldLabel({ children, required }) {
+  return (
+    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+      {children} {required && <span className="text-rose-500">*</span>}
+    </label>
+  );
+}
+
+function SectionTitle({ children }) {
+  return <h3 className="mb-5 text-lg font-bold text-slate-900">{children}</h3>;
+}
+
+function ImageTile({ src, alt, onRemove }) {
+  return (
+    <div className="relative overflow-hidden rounded-md border border-slate-200 bg-white">
+      <img src={src} alt={alt} className="h-40 w-full object-contain p-2" />
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute right-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
+        aria-label={`Remove ${alt}`}
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 function AdminEditProduct() {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -152,21 +190,18 @@ function AdminEditProduct() {
         setNewImageFiles([]);
       }
 
-      const {
-        productId: _,
-        ...payload
-        } = formData;
+      const { productId: _, ...payload } = formData;
 
-        payload.altNames = payload.altNames
+      payload.altNames = payload.altNames
         .split(",")
         .map((name) => name.trim())
         .filter(Boolean);
 
-        payload.price = Number(payload.price);
-        payload.labelledPrice = Number(payload.labelledPrice);
-        payload.stock = Number(payload.stock);
-        payload.isAvailable = payload.isAvailable === "true";
-        payload.images = [...existingImages, ...uploadedImageUrls];
+      payload.price = Number(payload.price);
+      payload.labelledPrice = Number(payload.labelledPrice);
+      payload.stock = Number(payload.stock);
+      payload.isAvailable = payload.isAvailable === "true";
+      payload.images = [...existingImages, ...uploadedImageUrls];
 
       await updateProduct(productId, payload);
 
@@ -182,15 +217,15 @@ function AdminEditProduct() {
 
   return (
     <AdminLayout title="Edit Product">
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl p-8">
+      <form onSubmit={handleSubmit} className="rounded border border-slate-200 bg-white p-6 sm:p-8">
         {isLoading && (
-          <div className="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+          <div className="rounded border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
             Loading product...
           </div>
         )}
 
         {productNotFound && !isLoading && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-600">
+          <div className="rounded border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-700">
             Product not found.
           </div>
         )}
@@ -198,26 +233,25 @@ function AdminEditProduct() {
         {!productNotFound && !isLoading && (
           <>
             {/* ================= Page Header ================= */}
-            <h2 className="text-3xl font-bold text-secondary">
-              Edit Product
-            </h2>
+            {/* <h2 className="text-2xl font-bold text-slate-900">Edit Product</h2> */}
 
-            <p className="mt-2 text-gray-600">
-              Update existing product information.
+
+
+            <p className="mt-1 text-sm text-black">
+              <b><i>● Update existing product informations.</i></b>
+              
             </p>
 
-            {/* ================= Basic Information ================= */}
-            <div className="mt-10">
-              <h3 className="text-2xl font-bold text-secondary mb-6">
-                Basic Information
-              </h3>
+            
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ================= Basic Information ================= */}
+            <div className="mt-8">
+              <SectionTitle>Basic Informations</SectionTitle>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Product ID */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Product ID <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Product ID</FieldLabel>
 
                   <input
                     type="text"
@@ -225,15 +259,13 @@ function AdminEditProduct() {
                     value={formData.productId}
                     disabled
                     placeholder="Enter product ID"
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300 bg-gray-100 text-gray-600"
+                    className={fieldClass(true)}
                   />
                 </div>
 
                 {/* Product Name */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Product Name <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Product Name</FieldLabel>
 
                   <input
                     type="text"
@@ -241,16 +273,14 @@ function AdminEditProduct() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter product name"
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                    className={fieldClass()}
                   />
                 </div>
               </div>
 
               {/* Alternative Names */}
               <div className="mt-6">
-                <label className="block mb-2 font-medium text-secondary">
-                  Alternative Names
-                </label>
+                <FieldLabel>Alternative Names</FieldLabel>
 
                 <input
                   type="text"
@@ -258,19 +288,17 @@ function AdminEditProduct() {
                   value={formData.altNames}
                   onChange={handleChange}
                   placeholder="Example: Gaming Laptop, Notebook"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className={fieldClass()}
                 />
 
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="mt-1.5 text-sm text-slate-500">
                   Separate multiple names using commas.
                 </p>
               </div>
 
               {/* Description */}
               <div className="mt-6">
-                <label className="block mb-2 font-medium text-secondary">
-                  Description <span className="text-red-500">*</span>
-                </label>
+                <FieldLabel required>Description</FieldLabel>
 
                 <textarea
                   rows="5"
@@ -278,29 +306,25 @@ function AdminEditProduct() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Enter product description..."
-                  className="w-full rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                  className={`${fieldClass()} resize-none`}
                 ></textarea>
               </div>
             </div>
 
             {/* ================= Product Details ================= */}
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h3 className="text-2xl font-bold text-secondary mb-6">
-                Product Details
-              </h3>
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionTitle>Product Details</SectionTitle>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 {/* Category */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Category <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Category</FieldLabel>
 
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                    className={`cursor-pointer ${fieldClass()}`}
                   >
                     <option value="">Select Category</option>
                     <option value="Laptop">Laptop</option>
@@ -318,9 +342,7 @@ function AdminEditProduct() {
 
                 {/* Brand */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Brand
-                  </label>
+                  <FieldLabel>Brand</FieldLabel>
 
                   <input
                     type="text"
@@ -328,15 +350,13 @@ function AdminEditProduct() {
                     value={formData.brand}
                     onChange={handleChange}
                     placeholder="Example: ASUS"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                    className={fieldClass()}
                   />
                 </div>
 
                 {/* Model */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Model
-                  </label>
+                  <FieldLabel>Model</FieldLabel>
 
                   <input
                     type="text"
@@ -344,24 +364,20 @@ function AdminEditProduct() {
                     value={formData.model}
                     onChange={handleChange}
                     placeholder="Example: TUF A15"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                    className={fieldClass()}
                   />
                 </div>
               </div>
             </div>
 
             {/* ================= Pricing ================= */}
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h3 className="text-2xl font-bold text-secondary mb-6">
-                Pricing
-              </h3>
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionTitle>Pricing</SectionTitle>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Price */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Selling Price <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Selling Price</FieldLabel>
 
                   <input
                     type="number"
@@ -369,15 +385,13 @@ function AdminEditProduct() {
                     value={formData.price}
                     onChange={handleChange}
                     placeholder="Enter selling price"
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                    className={fieldClass()}
                   />
                 </div>
 
                 {/* Labelled Price */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Labelled Price <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Labelled Price</FieldLabel>
 
                   <input
                     type="number"
@@ -385,24 +399,20 @@ function AdminEditProduct() {
                     value={formData.labelledPrice}
                     onChange={handleChange}
                     placeholder="Enter labelled price"
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                    className={fieldClass()}
                   />
                 </div>
               </div>
             </div>
 
             {/* ================= Inventory ================= */}
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h3 className="text-2xl font-bold text-secondary mb-6">
-                Inventory
-              </h3>
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionTitle>Inventory</SectionTitle>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Stock */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Stock Quantity <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Stock Quantity</FieldLabel>
 
                   <input
                     type="number"
@@ -410,21 +420,19 @@ function AdminEditProduct() {
                     value={formData.stock}
                     onChange={handleChange}
                     placeholder="Enter stock quantity"
-                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-300"
+                    className={fieldClass()}
                   />
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="block mb-2 font-medium text-secondary">
-                    Product Status
-                  </label>
+                  <FieldLabel>Product Status</FieldLabel>
 
                   <select
                     name="isAvailable"
                     value={formData.isAvailable}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+                    className={`cursor-pointer ${fieldClass()}`}
                   >
                     <option value="true">Available</option>
                     <option value="false">Unavailable</option>
@@ -434,86 +442,56 @@ function AdminEditProduct() {
             </div>
 
             {/* ================= Product Images ================= */}
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h3 className="text-2xl font-bold text-secondary mb-6">
-                Product Images
-              </h3>
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <SectionTitle>Product Images</SectionTitle>
 
-              <label className="block mb-2 font-medium text-secondary">
-                Upload Images <span className="text-red-500">*</span>
-              </label>
+              <FieldLabel required>Upload Images</FieldLabel>
 
               <input
                 type="file"
                 multiple
                 accept="image/*"
                 onChange={handleImageChange}
-                className="block w-full rounded-xl px-4 py-3 file:mr-4 file:px-4 file:py-2 file:border-0 file:rounded-lg file:bg-accent file:text-white hover:file:bg-teal-700 border border-gray-300"
+                className="block w-full cursor-pointer rounded-md border border-slate-200 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:bg-accent file:px-4 file:py-2 file:text-white file:transition-colors hover:file:bg-secondary"
               />
 
-              <p className="text-sm text-gray-500 mt-3">
+              <p className="mt-2 text-sm text-slate-500">
                 You can upload multiple product images.
               </p>
 
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="mt-1 text-sm text-slate-500">
                 Selected Images: {existingImages.length + previewImageUrls.length} / 5
               </p>
 
               {(existingImages.length > 0 || previewImageUrls.length > 0) && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {existingImages.map((image, index) => (
-                    <div
+                    <ImageTile
                       key={`${image}-${index}`}
-                      className="relative overflow-hidden rounded-xl border border-gray-300"
-                    >
-                      <img
-                        src={image}
-                        alt={`Existing product ${index + 1}`}
-                        className="h-40 w-full object-cover"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExistingImage(index)}
-                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow-sm transition duration-200 hover:bg-red-700"
-                        aria-label={`Remove existing image ${index + 1}`}
-                      >
-                        <span className="text-lg leading-none">×</span>
-                      </button>
-                    </div>
+                      src={image}
+                      alt={`Existing product ${index + 1}`}
+                      onRemove={() => handleRemoveExistingImage(index)}
+                    />
                   ))}
 
                   {previewImageUrls.map((image, index) => (
-                    <div
+                    <ImageTile
                       key={`preview-${index}`}
-                      className="relative overflow-hidden rounded-xl border border-gray-300"
-                    >
-                      <img
-                        src={image}
-                        alt={`New preview ${index + 1}`}
-                        className="h-40 w-full object-cover"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveNewImage(index)}
-                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow-sm transition duration-200 hover:bg-red-700"
-                        aria-label={`Remove new image ${index + 1}`}
-                      >
-                        <span className="text-lg leading-none">×</span>
-                      </button>
-                    </div>
+                      src={image}
+                      alt={`New preview ${index + 1}`}
+                      onRemove={() => handleRemoveNewImage(index)}
+                    />
                   ))}
                 </div>
               )}
             </div>
 
             {/* ================= Buttons ================= */}
-            <div className="mt-12 flex justify-end gap-4">
+            <div className="mt-10 flex justify-end gap-3 border-t border-slate-100 pt-8">
               <button
                 type="button"
                 onClick={() => navigate("/admin/products")}
-                className="px-8 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
+                className="cursor-pointer rounded-md border border-slate-200 px-6 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-accent hover:text-accent"
               >
                 Cancel
               </button>
@@ -521,7 +499,7 @@ function AdminEditProduct() {
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="px-8 py-3 rounded-xl bg-accent text-white font-semibold hover:bg-teal-700 transition cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                className="cursor-pointer rounded-md bg-accent px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isUpdating ? "Updating..." : "Update Product"}
               </button>

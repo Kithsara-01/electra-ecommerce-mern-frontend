@@ -1,6 +1,8 @@
 import { FaPlus, FaSearch, FaBoxOpen, FaEdit, FaTrash } from "react-icons/fa";
 
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.css";
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -11,8 +13,22 @@ import {
   updateProductAvailability,
 } from "../services/productService";
 
-function AdminProducts() {
+// Status badges: accent for the healthy state, amber for a soft warning,
+// rose for the hard-stop "out of stock" state — same scheme used on the
+// Stock Management page.
+const getStockStatus = (stock) => {
+  if (stock === 0) {
+    return { label: "Out of Stock", className: "bg-rose-50 text-rose-700" };
+  }
 
+  if (stock <= 5) {
+    return { label: "Low Stock", className: "bg-amber-50 text-amber-700" };
+  }
+
+  return { label: "In Stock", className: "bg-accent/10 text-accent" };
+};
+
+function AdminProducts() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,412 +38,298 @@ function AdminProducts() {
   const [selectedSort, setSelectedSort] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [updatingProductId, setUpdatingProductId] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [deletingProductId, setDeletingProductId] = useState(null);
-  
+
   const fetchProducts = async (
     query = "",
     category = "",
     sort = "newest",
     page = 1
   ) => {
-      try {
-        setLoading(true);
-        setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-        const params = {
-          page,
-          limit: 10,
-        };
+      const params = {
+        page,
+        limit: 10,
+      };
 
-        if (query) {
-          params.search = query;
-        }
-
-        if (category) {
-          params.category = category;
-        }
-
-        if (sort) {
-          params.sort = sort;
-        }
-
-        const data = await getAllAdminProducts(params);
-
-        setProducts(data.products || []);
-        setCurrentPage(data.currentPage || 1);
-        setTotalPages(data.totalPages || 1);
-      } catch (error) {
-        console.error("Fetch Products Error:", error);
-
-        setError("Failed to load products.");
-      } finally {
-        setLoading(false);
+      if (query) {
+        params.search = query;
       }
-    };
 
-    useEffect(() => {
-        setCurrentPage(1);
+      if (category) {
+        params.category = category;
+      }
 
-        const timer = setTimeout(() => {
-          fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, 1);
-        }, 500);
+      if (sort) {
+        params.sort = sort;
+      }
 
-        return () => clearTimeout(timer);
-      }, [searchTerm, selectedCategory, selectedSort]);
+      const data = await getAllAdminProducts(params);
 
-      const handleAvailabilityToggle = async (product) => {
-        try {
-          setUpdatingProductId(product.productId);
+      setProducts(data.products || []);
+      setCurrentPage(data.currentPage || 1);
+      setTotalPages(data.totalPages || 1);
+      setTotalProducts(data.totalProducts || 0);
+    } catch (error) {
+      console.error("Fetch Products Error:", error);
 
-          await updateProductAvailability(
-            product.productId,
-            !product.isAvailable
-          );
+      setError("Failed to load products.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          toast.success(
-            `Product marked as ${
-              !product.isAvailable ? "Available" : "Not Available"
-            }.`
-          );
+  useEffect(() => {
+    setCurrentPage(1);
 
-          await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
-        } catch (error) {
-          console.error("Update Availability Error:", error);
+    const timer = setTimeout(() => {
+      fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, 1);
+    }, 500);
 
-          toast.error("Failed to update product status.");
-        } finally {
-          setUpdatingProductId(null);
-        }
-      };
+    return () => clearTimeout(timer);
+  }, [searchTerm, selectedCategory, selectedSort]);
 
-      const handleDeleteClick = (product) => {
-        setSelectedProduct(product);
-        setShowDeleteModal(true);
-      };
+  const handleAvailabilityToggle = async (product) => {
+    try {
+      setUpdatingProductId(product.productId);
 
-      const closeDeleteModal = () => {
-        setShowDeleteModal(false);
-        setSelectedProduct(null);
-        setDeletingProductId(null);
-      };
+      await updateProductAvailability(product.productId, !product.isAvailable);
 
-      const handleDeleteConfirm = async () => {
-        if (!selectedProduct) return;
+      toast.success(
+        `Product marked as ${!product.isAvailable ? "Available" : "Not Available"}.`
+      );
 
-        try {
-          setDeletingProductId(selectedProduct.productId);
+      await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
+    } catch (error) {
+      console.error("Update Availability Error:", error);
 
-          await deleteProduct(selectedProduct.productId);
+      toast.error("Failed to update product status.");
+    } finally {
+      setUpdatingProductId(null);
+    }
+  };
 
-          toast.success("Product deleted successfully.");
-          closeDeleteModal();
-          await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
-        } catch (error) {
-          console.error("Delete Product Error:", error);
-          toast.error("Failed to delete product.");
-        } finally {
-          setDeletingProductId(null);
-        }
-      };
+  // Replaces the old handleDeleteClick + handleDeleteConfirm pair. The
+  // SweetAlert2 dialog itself now handles the confirm/cancel step that the
+  // custom modal used to own.
+  const handleDelete = async (product) => {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Delete Product",
+      text: `Are you sure you want to delete "${product.name}"? This action cannot be undone.`,
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#e11d48",
+      cancelButtonColor: "#64748b",
+    });
 
-      const getStockStatus = (stock) => {
-        if (stock === 0) {
-          return {
-            label: "Out of Stock",
-            className: "bg-red-100 text-red-700",
-          };
-        }
+    if (!result.isConfirmed) {
+      return;
+    }
 
-        if (stock <= 5) {
-          return {
-            label: "Low Stock",
-            className: "bg-yellow-100 text-yellow-700",
-          };
-        }
+    try {
+      setDeletingProductId(product.productId);
 
-        return {
-          label: "In Stock",
-          className: "bg-green-100 text-green-700",
-        };
-      };
+      await deleteProduct(product.productId);
 
+      await Swal.fire({
+        icon: "success",
+        title: "Product Deleted",
+        text: "The product has been deleted successfully.",
+        confirmButtonText: "OK",
+      });
 
+      await fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage);
+    } catch (error) {
+      console.error("Delete Product Error:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: error.response?.data?.message || "Failed to delete product.",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setDeletingProductId(null);
+    }
+  };
 
   return (
     <AdminLayout title="Products">
-
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-black ">
+            <b><i>● Manage all products in your electra store.</i></b>
+          </p>
 
-        <div>
-          
-
-          <p className="mt-2 text-lg font-medium text-gray-700">
-            Manage all products in your electronic store.
-          </p> 
+          <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
+            {totalProducts} {totalProducts === 1 ? "Product" : "Products"}
+          </span>
         </div>
 
-        {/* Add Product Button */}
         <button
           onClick={() => navigate("/admin/products/add")}
-          className="flex items-center gap-3 bg-accent text-white px-6 py-3 rounded-xl shadow-md hover:bg-teal-700 transition duration-300 cursor-pointer"
+          className="flex cursor-pointer items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-secondary"
         >
           <FaPlus />
-
-          <span className="font-semibold">
-            Add Product
-          </span>
-
+          Add Product
         </button>
-
       </div>
 
       {/* Search & Filter */}
-      <div className="mt-10 bg-white rounded-3xl shadow-xl p-6">
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
+      <div className="mt-6 rounded border border-slate-200 bg-white p-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Search */}
           <div className="relative">
-
-            <FaSearch
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
 
             <input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full rounded-md border border-slate-200 py-2.5 pl-11 pr-4 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
             />
-
           </div>
 
           {/* Category */}
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="cursor-pointer rounded-md border border-slate-200 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-accent"
           >
-
-            <option value="">
-              All Categories
-            </option>
-
-            <option value="Laptop">
-              Laptop
-            </option>
-
-            <option value="Desktop">
-              Desktop
-            </option>
-
-            <option value="Monitor">
-              Monitor
-            </option>
-
-            <option value="Keyboard">
-              Keyboard
-            </option>
-
-            <option value="Mouse">
-              Mouse
-            </option>
-
-            <option value="Printer">
-              Printer
-            </option>
-
-            <option value="Storage">
-              Storage
-            </option>
-
-            <option value="Networking">
-              Networking
-            </option>
-
-            <option value="Accessories">
-              Accessories
-            </option>
-
-            <option value="Other">
-              Other
-            </option>
-
+            <option value="">All Categories</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Keyboard">Keyboard</option>
+            <option value="Mouse">Mouse</option>
+            <option value="Printer">Printer</option>
+            <option value="Storage">Storage</option>
+            <option value="Networking">Networking</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Other">Other</option>
           </select>
 
           {/* Sort */}
           <select
             value={selectedSort}
             onChange={(e) => setSelectedSort(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="cursor-pointer rounded-md border border-slate-200 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-accent"
           >
-
-            <option value="newest">
-              Newest
-            </option>
-
-            <option value="oldest">
-              Oldest
-            </option>
-
-            <option value="priceLow">
-              Price: Low to High
-            </option>
-
-            <option value="priceHigh">
-              Price: High to Low
-            </option>
-
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="priceLow">Price: Low to High</option>
+            <option value="priceHigh">Price: High to Low</option>
           </select>
-
         </div>
-
       </div>
 
-      
-      <div className="mt-8 bg-white rounded-3xl shadow-xl overflow-hidden">
-
+      {/* Products Table */}
+      <div className="mt-6 overflow-hidden rounded border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-
           <table className="min-w-full">
-
-            <thead className="bg-gray-100">
-
-              <tr>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Image
-                </th>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Product
-                </th>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Category
-                </th>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Price
-                </th>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Stock
-                </th>
-
-                <th className="px-6 py-4 text-left text-sm font-semibold text-secondary">
-                  Status
-                </th>
-
-                <th className="px-6 py-4 text-center text-sm font-semibold text-secondary">
-                  Actions
-                </th>
-
+            <thead className="bg-slate-50">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3">Image</th>
+                <th className="px-6 py-3">Product</th>
+                <th className="px-6 py-3">Category</th>
+                <th className="px-6 py-3">Price</th>
+                <th className="px-6 py-3">Stock</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3 text-center">Actions</th>
               </tr>
-
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {products.length === 0 ? (
-
                 <tr>
-
-                  <td
-                    colSpan="7"
-                    className="py-20 text-center"
-                  >
-
+                  <td colSpan="7" className="py-20 text-center">
                     <div className="flex flex-col items-center">
-
-                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-5">
-
-                        <FaBoxOpen className="text-4xl text-accent" />
-
+                      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+                        <FaBoxOpen className="text-3xl text-accent" />
                       </div>
 
-                      <h3 className="text-2xl font-bold text-secondary">
-
+                      <h3 className="text-lg font-bold text-slate-900">
                         No Products Found
-
                       </h3>
 
-                      <p className="text-gray-500 mt-3">
-                        Click the <span className="font-semibold">"Add Product"</span> button above
-                        to create your first product.
+                      <p className="mt-2 text-sm text-slate-500">
+                        Click the <span className="font-semibold text-slate-700">"Add Product"</span>{" "}
+                        button above to create your first product.
                       </p>
-
                     </div>
-
                   </td>
-
                 </tr>
-
               ) : (
+                products.map((product) => {
+                  const status = getStockStatus(product.stock);
+                  const isDeleting = deletingProductId === product.productId;
 
-               products.map((product) => (
-                  <tr
-                    key={product.productId}
-                    className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200"
-                  >
+                  return (
+                    <tr
+                      key={product.productId}
+                      className="transition-colors hover:bg-slate-50"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="h-14 w-14 overflow-hidden rounded-md border border-slate-200 bg-white p-1">
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src =
+                                "https://placehold.co/80x80/FFFFFF/94A3B8?text=No+Image";
+                            }}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                    </td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                        {product.name}
+                      </td>
 
-                    <td className="px-6 py-4 font-medium">
-                      {product.name}
-                    </td>
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {product.category}
+                      </td>
 
-                    <td className="px-6 py-4">
-                      {product.category}
-                    </td>
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        Rs. {product.price.toLocaleString()}
+                      </td>
 
-                    <td className="px-6 py-4">
-                      Rs. {product.price.toLocaleString()}
-                    </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-sm font-semibold text-slate-900">
+                            {product.stock} Units
+                          </span>
 
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
-                        <span className="font-semibold text-secondary">
-                          {product.stock} Units
-                        </span>
+                          <span
+                            className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+                          >
+                            {status.label}
+                          </span>
+                        </div>
+                      </td>
 
-                        <span
-                          className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-                            getStockStatus(product.stock).className
-                          }`}
-                        >
-                          {getStockStatus(product.stock).label}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-
-                      <div className="flex flex-col items-start gap-3">
-
+                      <td className="px-6 py-4">
                         <button
-                            type="button"
-                            onClick={() => handleAvailabilityToggle(product)}
-                            disabled={updatingProductId === product.productId}
-                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
-                              updatingProductId === product.productId
-                                ? "opacity-60 cursor-not-allowed"
-                                : "cursor-pointer hover:scale-105"
-                            } ${
-                              product.isAvailable
-                                ? "bg-green-700 text-white hover:bg-green-600"
-                                : "bg-yellow-700 text-white hover:bg-yellow-600"
-                            }`}
+                          type="button"
+                          onClick={() => handleAvailabilityToggle(product)}
+                          disabled={updatingProductId === product.productId}
+                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
+                            updatingProductId === product.productId
+                              ? "cursor-not-allowed opacity-60"
+                              : "cursor-pointer hover:bg-secondary"
+                          } ${product.isAvailable ? "bg-accent" : "bg-amber-500"}`}
                         >
                           {updatingProductId === product.productId
                             ? "Updating..."
@@ -435,119 +337,84 @@ function AdminProducts() {
                             ? "Available"
                             : "Not Available"}
                         </button>
+                      </td>
 
-                       
-                      </div>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            title="Edit Product"
+                            onClick={() =>
+                              navigate(`/admin/products/edit/${product.productId}`)
+                            }
+                            className="inline-flex cursor-pointer items-center justify-center rounded-md p-2 text-slate-500 transition-colors hover:bg-accent/10 hover:text-accent"
+                          >
+                            <FaEdit />
+                          </button>
 
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          title="Edit Product"
-                          onClick={() => navigate(`/admin/products/edit/${product.productId}`)}
-                          className="inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition duration-200 ease-out cursor-pointer text-lg hover:scale-105 hover:text-[#2FA084] hover:bg-green-100"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          type="button"
-                          title="Delete Product"
-                          onClick={() => handleDeleteClick(product)}
-                          className="inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition duration-200 ease-out cursor-pointer text-lg hover:scale-105 hover:text-red-600 hover:bg-red-100"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-
-                  </tr>
-                ))
-
+                          <button
+                            type="button"
+                            title="Delete Product"
+                            onClick={() => handleDelete(product)}
+                            disabled={isDeleting}
+                            className={`inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition-colors ${
+                              isDeleting
+                                ? "cursor-not-allowed opacity-50"
+                                : "cursor-pointer hover:bg-rose-50 hover:text-rose-600"
+                            }`}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
-
             </tbody>
           </table>
-
         </div>
-
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-4">
+      {/* Pagination */}
+      <div className="mt-6 flex items-center justify-center gap-3">
         <button
           type="button"
-          onClick={() => fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage - 1)}
+          onClick={() =>
+            fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage - 1)
+          }
           disabled={currentPage === 1 || loading}
-          className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+            currentPage === 1 || loading
+              ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+              : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+          }`}
         >
           Previous
         </button>
 
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
+        <span className="text-sm text-slate-500">
+          Page <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
+          <span className="font-semibold text-slate-900">{totalPages}</span>
         </span>
 
         <button
           type="button"
-          onClick={() => fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage + 1)}
+          onClick={() =>
+            fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage + 1)
+          }
           disabled={currentPage === totalPages || loading}
-          className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+            currentPage === totalPages || loading
+              ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+              : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+          }`}
         >
           Next
         </button>
       </div>
-
-      {showDeleteModal && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <FaTrash className="text-xl text-red-600" />
-            </div>
-
-            <h3 className="text-center text-xl font-semibold text-secondary">
-              Delete Product
-            </h3>
-
-            <p className="mt-3 text-center text-sm leading-6 text-gray-600">
-              Are you sure you want to delete this product?
-              <br />
-              This action cannot be undone.
-            </p>
-
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={deletingProductId === selectedProduct.productId}
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition ${
-                  deletingProductId === selectedProduct.productId
-                    ? "cursor-not-allowed bg-red-400"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
-              >
-                {deletingProductId === selectedProduct.productId
-                  ? "Deleting..."
-                  : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </AdminLayout>
-
   );
-
 }
-
 
 export default AdminProducts;

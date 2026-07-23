@@ -214,8 +214,10 @@ function AdminOrders() {
         <div className="mb-4 flex items-center justify-between">
           
           <div>
-            <h2 className="text-2xl font-semibold text-secondary">Order Management</h2>
-            <p className="mt-1 text-sm text-slate-600">Track and update customer orders in real time.</p>
+            {/* <h2 className="text-2xl font-semibold text-secondary">Order Management</h2> */}
+            <p className="mt-1 text-sm text-black">
+              <b><i>● Track , Manage and update customer orders in real time.</i></b>
+            </p>
           </div>
           <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
             {totalOrders} orders
