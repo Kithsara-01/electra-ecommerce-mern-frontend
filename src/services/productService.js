@@ -101,3 +101,27 @@ export const deleteProduct = async (productId) => {
 
   return response.data;
 };
+
+
+// ===============================
+// Generate AI Product Description
+// ===============================
+export const generateAIDescription = async (productData) => {
+
+  const response = await API.post(
+    "/products/ai-description",
+    productData
+  );
+
+  return response.data;
+};
+
+
+export const generateAIAlternativeNames = async (data) => {
+  const response = await API.post(
+    "/products/ai-alternative-names",
+    data
+  );
+
+  return response.data;
+};
