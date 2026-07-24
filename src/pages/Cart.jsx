@@ -107,8 +107,15 @@ function Cart() {
     return (
       <>
         <Header showSearch={false} />
-        <div className="mx-auto max-w-7xl px-4 py-20 text-center text-xl text-slate-600">
-          Loading cart...
+
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+            <p className="text-sm text-slate-600">
+              Loading cart...
+            </p>
+          </div>
         </div>
       </>
     );

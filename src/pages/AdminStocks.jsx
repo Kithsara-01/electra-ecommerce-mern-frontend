@@ -207,26 +207,20 @@ function AdminStocks() {
 
   // ---- Loading skeleton (first load only) ----
   if (loading) {
-    return (
-      <AdminLayout title="Stock Management">
-        <div className="space-y-6">
-          <div className="h-6 w-80 animate-pulse rounded bg-slate-200" />
+      return (
+        <AdminLayout title="Stock Management">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-20 animate-pulse rounded border border-slate-200 bg-slate-100"
-              />
-            ))}
+              <p className="text-sm text-slate-600">
+                Loading stock data...
+              </p>
+            </div>
           </div>
-
-          <div className="h-16 animate-pulse rounded border border-slate-200 bg-slate-100" />
-          <div className="h-96 animate-pulse rounded border border-slate-200 bg-slate-100" />
-        </div>
-      </AdminLayout>
-    );
-  }
+        </AdminLayout>
+      );
+    }
 
   return (
     <AdminLayout title="Stock Management">

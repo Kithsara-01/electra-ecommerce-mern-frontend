@@ -10,6 +10,10 @@ import {
   FaMoneyBillWave,
   FaBoxOpen,
   FaCreditCard,
+  FaTruck,
+  FaInfoCircle,
+  FaClipboardList,
+  FaTag,
 } from "react-icons/fa";
 
 import { getOrderById } from "../services/orderService";
@@ -31,22 +35,17 @@ const formatDate = (date) =>
 const getStatusBadge = (status) => {
   switch (status) {
     case "Pending":
-      return "bg-yellow-100 text-yellow-700";
-
+      return "border border-amber-200 bg-amber-50 text-amber-700";
     case "Processing":
-      return "bg-blue-100 text-blue-700";
-
+      return "border border-blue-200 bg-blue-50 text-blue-700";
     case "Shipped":
-      return "bg-purple-100 text-purple-700";
-
+      return "border border-indigo-200 bg-indigo-50 text-indigo-700";
     case "Delivered":
-      return "bg-green-100 text-green-700";
-
+      return "border border-accent/30 bg-accent/10 text-accent";
     case "Cancelled":
-      return "bg-red-100 text-red-700";
-
+      return "border border-rose-200 bg-rose-50 text-rose-700";
     default:
-      return "bg-slate-100 text-slate-700";
+      return "border border-slate-200 bg-slate-100 text-slate-700";
   }
 };
 
@@ -66,15 +65,10 @@ function AdminOrderDetails() {
     try {
       setLoading(true);
       setError("");
-
       const response = await getOrderById(orderId);
-
       setOrder(response.order);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to load order."
-      );
+      setError(err.response?.data?.message || "Failed to load order.");
     } finally {
       setLoading(false);
     }
@@ -83,12 +77,9 @@ function AdminOrderDetails() {
   if (loading) {
     return (
       <AdminLayout title="Order Details">
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-          <h2 className="text-2xl font-semibold">
-            Loading Order...
-          </h2>
-
-          <p className="mt-2 text-slate-500">
+        <div className="rounded-md border border-slate-200 bg-white p-12 text-center">
+          <h2 className="text-2xl font-semibold text-slate-900">Loading Order...</h2>
+          <p className="mt-2 text-sm text-slate-500">
             Please wait while we load the order details.
           </p>
         </div>
@@ -99,10 +90,8 @@ function AdminOrderDetails() {
   if (error) {
     return (
       <AdminLayout title="Order Details">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center shadow-sm">
-          <h2 className="text-xl font-semibold text-red-700">
-            {error}
-          </h2>
+        <div className="rounded-md border border-rose-200 bg-rose-50 p-12 text-center">
+          <h2 className="text-xl font-semibold text-rose-700">{error}</h2>
         </div>
       </AdminLayout>
     );
@@ -110,458 +99,362 @@ function AdminOrderDetails() {
 
   return (
     <AdminLayout title="Order Details">
+      <div className="space-y-5">
 
-      <div className="space-y-6">
+        {/* ─── 1. ORDER HEADER ─────────────────────────────────────────────────── */}
+        <div className="rounded-md border border-slate-200 bg-white p-5">
+          {/* Back nav */}
+          <div className="mb-5 border-b border-slate-100 pb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-accent"
+            >
+              <FaArrowLeft className="h-3.5 w-3.5" />
+              Back to Orders
+            </button>
+          </div>
 
-        {/* Header */}
-
-        <div className="rounded-3xl bg-gradient-to-r from-[#2FA084] to-[#25856d] p-8 text-white shadow-xl">
-
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-            <div>
-
-              <button
-                onClick={() => navigate(-1)}
-                className="mb-5 flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm transition hover:bg-white/30"
-              >
-                <FaArrowLeft />
-
-                Back
-              </button>
-
-              <h1 className="text-4xl font-bold">
-                Order Details
+          {/* Order identity row */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                Order #{order.orderCode || order._id.slice(-8).toUpperCase()}
               </h1>
-
-              <p className="mt-2 text-white/90">
-                Order #
-                {order._id.slice(-8).toUpperCase()}
+              <p className="text-sm text-slate-500">
+                Placed on {formatDate(order.createdAt)}
               </p>
-
             </div>
 
             <span
-              className={`rounded-full px-5 py-2 text-sm font-semibold ${getStatusBadge(
+              className={`self-start rounded-full px-4 py-1.5 text-sm font-semibold ${getStatusBadge(
                 order.orderStatus
               )}`}
             >
               {order.orderStatus}
             </span>
-
           </div>
-
         </div>
 
-        {/* Order Tracker */}
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-          <h2 className="text-xl font-bold text-secondary">
-            Order Progress
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Current delivery status
-          </p>
-
-          <div className="mt-8">
-            <OrderStatusTracker
-              currentStatus={order.orderStatus}
-            />
+        {/* ─── 2. ORDER PROGRESS TIMELINE ──────────────────────────────────────── */}
+        <div className="rounded-md border border-slate-200 bg-white p-6">
+          <div className="mb-6 flex items-center gap-2">
+            <FaClipboardList className="h-4 w-4 text-slate-400" />
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Order Progress</h2>
+              <p className="text-sm text-slate-500">Current delivery status</p>
+            </div>
           </div>
 
+          <OrderStatusTracker currentStatus={order.orderStatus} />
         </div>
 
-        {/* Summary Cards */}
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-sm text-slate-500">
+        {/* ─── 3. ORDER OVERVIEW (SUMMARY CARDS) ───────────────────────────────── */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {/* Customer */}
+          <div className="rounded-md border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase text-slate-600">
                   Customer
                 </p>
-
-                <h2 className="mt-2 text-xl font-bold">
+                <p className="mt-1.5 truncate text-base font-semibold text-slate-900">
                   {order.customerName}
-                </h2>
-
+                </p>
               </div>
-
-              <div className="rounded-xl bg-accent/10 p-4 text-accent">
-                <FaUser size={22} />
+              <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                <FaUser size={18} />
               </div>
-
             </div>
-
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-sm text-slate-500">
+          {/* Grand Total — the one figure on this row that earns the accent color */}
+          <div className="rounded-md border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase text-slate-600">
                   Grand Total
                 </p>
-
-                <h2 className="mt-2 text-2xl font-bold text-accent">
+                <p className="mt-1.5 text-xl font-semibold text-accent">
                   {formatPrice(order.grandTotal)}
-                </h2>
-
+                </p>
               </div>
-
-              <div className="rounded-xl bg-accent/10 p-4 text-accent">
-                <FaMoneyBillWave size={22} />
+              <div className="flex-shrink-0 rounded-md bg-accent/10 p-3 text-accent">
+                <FaMoneyBillWave size={18} />
               </div>
-
             </div>
-
           </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-sm text-slate-500">
+          {/* Total Items */}
+          <div className="rounded-md border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase text-slate-600">
                   Total Items
                 </p>
-
-                <h2 className="mt-2 text-2xl font-bold">
+                <p className="mt-1.5 text-xl font-semibold text-slate-900">
                   {order.items.length}
-                </h2>
-
-              </div>
-
-              <div className="rounded-xl bg-accent/10 p-4 text-accent">
-                <FaBoxOpen size={22} />
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-sm text-slate-500">
-                  Payment
                 </p>
-
-                <h2 className="mt-2 text-lg font-bold">
-                  {order.paymentMethod}
-                </h2>
-
               </div>
-
-              <div className="rounded-xl bg-accent/10 p-4 text-accent">
-                <FaCreditCard size={22} />
+              <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                <FaBoxOpen size={18} />
               </div>
-
             </div>
-
           </div>
 
+          {/* Payment Method */}
+          <div className="rounded-md border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase text-slate-600">
+                  Payment Method
+                </p>
+                <p className="mt-1.5 text-base font-semibold text-slate-900">
+                  {order.paymentMethod}
+                </p>
+              </div>
+              <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                <FaCreditCard size={18} />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Customer & Delivery */}
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
+        {/* ─── 4. CUSTOMER & SHIPPING INFORMATION ──────────────────────────────── */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Customer Information */}
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <h2 className="text-xl font-bold text-secondary">
-              Customer Information
-            </h2>
-
-            <div className="mt-6 space-y-5">
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Full Name
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.customerName}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Email Address
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.email}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Phone Number
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.phone}
-                </p>
-              </div>
-
+          <div className="rounded-md border border-slate-200 bg-white p-6">
+            <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+              <FaUser className="h-4 w-4 text-slate-400" />
+              <h2 className="text-base font-semibold text-slate-900">
+                Customer Information
+              </h2>
             </div>
 
+            <dl className="space-y-4">
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs font-medium uppercase text-slate-600">
+                  Full Name
+                </dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {order.customerName}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs font-medium uppercase text-slate-600">
+                  Email Address
+                </dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {order.email}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs font-medium uppercase text-slate-600">
+                  Phone Number
+                </dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {order.phone}
+                </dd>
+              </div>
+            </dl>
           </div>
 
           {/* Delivery Information */}
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-            <h2 className="text-xl font-bold text-secondary">
-              Delivery Information
-            </h2>
-
-            <div className="mt-6 space-y-5">
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Street Address
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.streetAddress}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  City
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.city}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  District
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.district}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Postal Code
-                </p>
-
-                <p className="mt-1 font-semibold">
-                  {order.postalCode}
-                </p>
-              </div>
-
-              {order.deliveryNotes && (
-                <div>
-                  <p className="text-sm text-slate-500">
-                    Delivery Notes
-                  </p>
-
-                  <p className="mt-1 font-semibold">
-                    {order.deliveryNotes}
-                  </p>
-                </div>
-              )}
-
+          <div className="rounded-md border border-slate-200 bg-white p-6">
+            <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+              <FaTruck className="h-4 w-4 text-slate-400" />
+              <h2 className="text-base font-semibold text-slate-900">
+                Delivery Information
+              </h2>
             </div>
 
-          </div>
+            <dl className="space-y-4">
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs font-medium uppercase text-slate-600">
+                  Street Address
+                </dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {order.streetAddress}
+                </dd>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium uppercase text-slate-600">
+                    City
+                  </dt>
+                  <dd className="text-sm font-medium text-slate-900">
+                    {order.city}
+                  </dd>
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium uppercase text-slate-600">
+                    District
+                  </dt>
+                  <dd className="text-sm font-medium text-slate-900">
+                    {order.district}
+                  </dd>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-xs font-medium uppercase text-slate-600">
+                  Postal Code
+                </dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {order.postalCode}
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
 
-        {/* Order Summary */}
+        {/* ─── 5. ORDERED PRODUCTS ──────────────────────────────────────────────── */}
+        <div className="rounded-md border border-slate-200 bg-white p-6">
+          <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+            <FaBoxOpen className="h-4 w-4 text-slate-400" />
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Ordered Products</h2>
+              <p className="text-sm text-slate-500">
+                {order.items.length} {order.items.length === 1 ? "item" : "items"} in this order
+              </p>
+            </div>
+          </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="overflow-x-auto rounded-md border border-slate-200">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-600">
+                    Product
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase text-slate-600">
+                    Qty
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-600">
+                    Unit Price
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-600">
+                    Total
+                  </th>
+                </tr>
+              </thead>
 
-          <h2 className="text-xl font-bold text-secondary">
-            Order Summary
-          </h2>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {order.items.map((item) => (
+                  <tr
+                    key={item.productId}
+                    className="transition-colors duration-150 hover:bg-slate-50"
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                              "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%25' height='100%25' fill='%23f1f5f9'/></svg>";
+                          }}
+                          className="h-14 w-14 flex-shrink-0 rounded-md border border-slate-200 bg-white object-contain p-1"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">
+                            {item.name}
+                          </p>
+                          <p className="mt-0.5 text-xs text-slate-400">
+                            SKU: {item.productId?.slice(-8).toUpperCase() ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
 
-          <div className="mt-6 space-y-4">
+                    <td className="px-4 py-4 text-center">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                        {item.quantity}
+                      </span>
+                    </td>
 
-            <div className="flex justify-between">
-              <span className="text-slate-600">
-                Subtotal
-              </span>
+                    <td className="px-4 py-4 text-right text-sm text-slate-600">
+                      {formatPrice(item.price)}
+                    </td>
 
-              <span className="font-semibold">
+                    <td className="px-4 py-4 text-right text-sm font-semibold text-slate-900">
+                      {formatPrice(item.price * item.quantity)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ─── 6. PAYMENT SUMMARY (HIGHLIGHTED) ────────────────────────────────── */}
+        <div className="rounded-md border border-accent/20 bg-accent/5 p-6">
+          <div className="mb-5 flex items-center gap-2 border-b border-accent/10 pb-4">
+            <FaMoneyBillWave className="h-4 w-4 text-accent" />
+            <h2 className="text-base font-semibold text-slate-900">Payment Summary</h2>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-600">Subtotal</span>
+              <span className="font-medium text-slate-900">
                 {formatPrice(order.subtotal)}
               </span>
             </div>
 
-            <div className="flex justify-between">
-              <span className="text-slate-600">
-                Delivery Fee
-              </span>
-
-              <span className="font-semibold">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-600">Delivery Fee</span>
+              <span className="font-medium text-slate-900">
                 {formatPrice(order.deliveryFee)}
               </span>
             </div>
 
-            <div className="flex justify-between">
-              <span className="text-slate-600">
+            <div className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <FaTag className="h-3.5 w-3.5 text-slate-400" />
                 Discount
               </span>
-
-              <span className="font-semibold">
-                - {formatPrice(order.discount)}
+              <span className="font-medium text-slate-900">
+                − {formatPrice(order.discount)}
               </span>
             </div>
 
-            <div className="border-t border-slate-200 pt-4">
-
-              <div className="flex justify-between">
-
-                <span className="text-lg font-bold">
-                  Grand Total
-                </span>
-
-                <span className="text-2xl font-bold text-accent">
+            <div className="mt-2 border-t border-accent/20 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-base font-semibold text-slate-900">Grand Total</span>
+                <span className="text-2xl font-semibold text-accent">
                   {formatPrice(order.grandTotal)}
                 </span>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
-                {/* Ordered Products */}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-          <div className="mb-6 flex items-center justify-between">
-
-            <div>
-
-              <h2 className="text-xl font-bold text-secondary">
-                Ordered Products
+        {/* ─── 7. ADDITIONAL INFORMATION (conditional) ─────────────────────────── */}
+        {order.deliveryNotes && (
+          <div className="rounded-md border border-slate-200 bg-white p-6">
+            <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+              <FaInfoCircle className="h-4 w-4 text-slate-400" />
+              <h2 className="text-base font-semibold text-slate-900">
+                Additional Information
               </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Products included in this order
-              </p>
-
             </div>
 
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xs font-medium uppercase text-slate-600">
+                Delivery Notes
+              </p>
+              <p className="mt-1 text-sm text-slate-700">{order.deliveryNotes}</p>
+            </div>
           </div>
-
-          <div className="overflow-x-auto">
-
-            <table className="min-w-full">
-
-              <thead className="border-b border-slate-200 bg-slate-50">
-
-                <tr>
-
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600">
-                    Product
-                  </th>
-
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-slate-600">
-                    Quantity
-                  </th>
-
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600">
-                    Unit Price
-                  </th>
-
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600">
-                    Total
-                  </th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {order.items.map((item) => (
-
-                  <tr
-                    key={item.productId}
-                    className="border-b border-slate-100 transition duration-200 hover:bg-slate-50"
-                  >
-
-                    <td className="px-4 py-5">
-
-                      <div className="flex items-center gap-4">
-
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="h-16 w-16 rounded-xl border border-slate-200 object-cover"
-                        />
-
-                        <div>
-
-                          <h3 className="font-semibold text-secondary">
-                            {item.name}
-                          </h3>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            Product Item
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                    </td>
-
-                    <td className="px-4 py-5 text-center">
-
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 font-semibold text-accent">
-                        {item.quantity}
-                      </span>
-
-                    </td>
-
-                    <td className="px-4 py-5 text-right font-medium">
-                      {formatPrice(item.price)}
-                    </td>
-
-                    <td className="px-4 py-5 text-right font-bold text-secondary">
-                      {formatPrice(item.price * item.quantity)}
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
+        )}
 
       </div>
-
     </AdminLayout>
   );
 }

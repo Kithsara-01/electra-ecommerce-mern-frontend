@@ -70,10 +70,14 @@ function CustomerCare() {
   if (loading) {
     return (
       <AdminLayout title="Customer Care">
-        <div className="space-y-6">
-          <div className="h-6 w-80 animate-pulse rounded bg-slate-200" />
-          <div className="h-16 animate-pulse rounded border border-slate-200 bg-slate-100" />
-          <div className="h-96 animate-pulse rounded border border-slate-200 bg-slate-100" />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+            <p className="text-sm text-slate-600">
+              Loading messages...
+            </p>
+          </div>
         </div>
       </AdminLayout>
     );

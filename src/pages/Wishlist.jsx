@@ -49,6 +49,24 @@ const handleRemove = async (productId) => {
   }
 };
 
+if (loading) {
+    return (
+      <>
+        <Header />
+
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+            <p className="text-sm text-slate-600">
+              Loading wishlist...
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
 
   return (
     <>
@@ -60,9 +78,7 @@ const handleRemove = async (productId) => {
         </h1>
 
         <div className="rounded-lg border border-slate-200 bg-white p-10 text-center">
-          {loading ? (
-            <p className="text-slate-600">Loading wishlist...</p>
-            ) : error ? (
+            {error ? (
             <p className="text-red-600">{error}</p>
             ) : wishlist.length === 0 ? (
             <p className="text-slate-600">Your wishlist is empty.</p>

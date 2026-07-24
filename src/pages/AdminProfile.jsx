@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaEdit } from "react-icons/fa";
 
+import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 import defaultProfile from "../assets/default-profile.png";
 
@@ -16,83 +17,96 @@ function AdminProfile() {
       })
     : "Not Available";
 
+  const infoRows = [
+    { label: "Name", value: user?.name || "Admin" },
+    { label: "Email", value: user?.email || "Not Added" },
+    { label: "Phone", value: user?.phone || "Not Added" },
+    { label: "Address", value: user?.address || "Not Added" },
+  ];
+
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center p-6 border-b border-gray-200">
-          <button
-            onClick={() => navigate("/admin-dashboard")}
-            className="w-11 h-11 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
-          >
-            <FaArrowLeft className="text-xl text-secondary" />
-          </button>
+    <>
+      <Header showSearch={false} />
 
-          <h2 className="flex-1 text-center text-2xl font-bold text-secondary mr-11">
-            Admin Profile
-          </h2>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 
-        <div className="flex flex-col items-center p-8">
-          <img
-            src={user?.profileImage || defaultProfile}
-            alt="Admin Profile"
-            className="w-32 h-32 rounded-full border-4 border-accent object-cover"
-          />
+          <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-md border border-slate-200 bg-white">
 
-          <h1 className="mt-5 text-3xl font-bold text-secondary">
-            {user?.name || "Admin"}
-          </h1>
+            {/* Header */}
+            <div className="flex items-center border-b border-slate-100 p-5">
+              <button
+                onClick={() => navigate("/admin-dashboard")}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded transition-colors hover:bg-slate-100"
+              >
+                <FaArrowLeft className="text-sm text-slate-700" />
+              </button>
 
-          <p className="mt-2 text-gray-500">{user?.email}</p>
-        </div>
+              <h2 className="mr-9 flex-1 text-center text-lg font-bold text-slate-900">
+                Admin Profile
+              </h2>
+            </div>
 
-        <hr className="border-gray-200" />
+            {/* Profile */}
+            <div className="flex flex-col items-center p-8">
+              <img
+                src={user?.profileImage || defaultProfile}
+                alt="Admin Profile"
+                className="h-28 w-28 rounded-full border-2 border-accent object-cover"
+              />
 
-        <div className="p-8">
-          <div className="flex justify-between py-5 border-b border-gray-200">
-            <span className="font-semibold text-secondary">Name</span>
-            <span className="text-gray-600">{user?.name || "Admin"}</span>
+              <h1 className="mt-4 text-2xl font-bold text-slate-900">
+                {user?.name || "Admin"}
+              </h1>
+
+              <p className="mt-1 text-sm text-slate-500">{user?.email}</p>
+            </div>
+
+            <hr className="border-slate-100" />
+
+            {/* Info */}
+            <div className="p-8">
+              {infoRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex justify-between border-b border-slate-100 py-4 last:border-none"
+                >
+                  <span className="text-sm font-semibold text-slate-900">
+                    {row.label}
+                  </span>
+                  <span className="text-sm text-slate-600">{row.value}</span>
+                </div>
+              ))}
+
+              <div className="flex justify-between border-t border-slate-100 py-4">
+                <span className="text-sm font-semibold text-slate-900">Role</span>
+                <span className="rounded bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+                  {user?.role || "Admin"}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-t border-slate-100 py-4">
+                <span className="text-sm font-semibold text-slate-900">Joined</span>
+                <span className="text-sm text-slate-600">{joinedDate}</span>
+              </div>
+            </div>
+
+            {/* Edit Button */}
+            <div className="p-8 pt-0">
+              <button
+                onClick={() => navigate("/admin/edit-profile")}
+                className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded bg-accent py-2.5 text-sm font-semibold text-white transition-colors hover:bg-secondary"
+              >
+                <FaEdit className="text-xs" />
+                Edit Profile
+              </button>
+            </div>
+
           </div>
 
-          <div className="flex justify-between py-5 border-b border-gray-200">
-            <span className="font-semibold text-secondary">Email</span>
-            <span className="text-gray-600">{user?.email || "Not Added"}</span>
-          </div>
-
-          <div className="flex justify-between py-5 border-b border-gray-200">
-            <span className="font-semibold text-secondary">Phone</span>
-            <span className="text-gray-600">{user?.phone || "Not Added"}</span>
-          </div>
-
-          <div className="flex justify-between py-5 border-b border-gray-200">
-            <span className="font-semibold text-secondary">Address</span>
-            <span className="text-gray-600">{user?.address || "Not Added"}</span>
-          </div>
-
-          <div className="flex justify-between py-5 border-b border-gray-200">
-            <span className="font-semibold text-secondary">Role</span>
-            <span className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm font-medium">
-              {user?.role || "Admin"}
-            </span>
-          </div>
-
-          <div className="flex justify-between py-5">
-            <span className="font-semibold text-secondary">Joined</span>
-            <span className="text-gray-600">{joinedDate}</span>
-          </div>
-        </div>
-
-        <div className="p-8 pt-0">
-          <button
-            onClick={() => navigate("/admin/edit-profile")}
-            className="w-full bg-accent hover:opacity-90 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-3 transition"
-          >
-            <FaEdit />
-            Edit Profile
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

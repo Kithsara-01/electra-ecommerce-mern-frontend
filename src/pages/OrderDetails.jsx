@@ -1,94 +1,60 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  FaArrowLeft,
-  FaBoxOpen,
-  FaCreditCard,
-  FaLocationDot,
-  FaTruck,
-  FaUser,
-} from "react-icons/fa6";
-
 import Header from "../components/Header";
 import OrderStatusTracker from "../components/OrderStatusTracker";
+
+import {
+  FaArrowLeft,
+  FaUser,
+  FaMoneyBillWave,
+  FaBoxOpen,
+  FaCreditCard,
+  FaTruck,
+  FaInfoCircle,
+  FaClipboardList,
+  FaTag,
+  FaCalendarDay,
+  FaDownload,
+} from "react-icons/fa";
+
 import { getOrderById } from "../services/orderService";
+import { downloadInvoice } from "../utils/invoiceGenerator";
 
-const currencyFormatter = new Intl.NumberFormat("en-LK", {
-  style: "currency",
-  currency: "LKR",
-  maximumFractionDigits: 0,
-});
+const formatPrice = (price) =>
+  new Intl.NumberFormat("en-LK", {
+    style: "currency",
+    currency: "LKR",
+    maximumFractionDigits: 0,
+  }).format(price || 0);
 
-const formatPrice = (value) => {
-  if (typeof value === "number") {
-    return currencyFormatter.format(value);
-  }
-
-  return "LKR 0";
-};
-
-const formatDate = (value) => {
-  if (!value) return "N/A";
-
-  return new Date(value).toLocaleDateString("en-LK", {
-    day: "2-digit",
-    month: "long",
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString("en-LK", {
     year: "numeric",
+    month: "short",
+    day: "numeric",
   });
-};
 
-// Status badges: accent for the positive/delivered state, rose for cancelled,
-// neutral slate for everything still in progress.
-const getStatusStyles = (status = "") => {
-  switch (status.toLowerCase()) {
-    case "delivered":
-      return "bg-accent/10 text-accent";
-
-    case "cancelled":
-      return "bg-rose-50 text-rose-700";
-
-    case "pending":
-    case "processing":
-    case "shipped":
-      return "bg-slate-100 text-slate-700";
-
+const getStatusBadge = (status) => {
+  switch (status) {
+    case "Pending":
+      return "border border-amber-200 bg-amber-50 text-amber-700";
+    case "Processing":
+      return "border border-blue-200 bg-blue-50 text-blue-700";
+    case "Shipped":
+      return "border border-indigo-200 bg-indigo-50 text-indigo-700";
+    case "Delivered":
+      return "border border-accent/30 bg-accent/10 text-accent";
+    case "Cancelled":
+      return "border border-rose-200 bg-rose-50 text-rose-700";
     default:
-      return "bg-slate-100 text-slate-700";
+      return "border border-slate-200 bg-slate-100 text-slate-700";
   }
 };
-
-// Label/value pair reused across every section of the page.
-function InfoRow({ label, value }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-medium text-slate-900">{value || "N/A"}</p>
-    </div>
-  );
-}
-
-// Section heading used inside the single page — no card border, just an
-// icon + title + subtitle, since everything now lives in one white sheet.
-function SectionHeading({ icon: Icon, title, subtitle }) {
-  return (
-    <div className="mb-6 flex items-center gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
-        <Icon />
-      </div>
-      <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
-      </div>
-    </div>
-  );
-}
 
 function OrderDetails() {
-  const navigate = useNavigate();
   const { orderId } = useParams();
+  const navigate = useNavigate();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -101,26 +67,14 @@ function OrderDetails() {
   const loadOrder = async () => {
     try {
       setLoading(true);
-
+      setError("");
       const response = await getOrderById(orderId);
-
       setOrder(response.order);
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Failed to load order details."
-      );
+      setError(err.response?.data?.message || "Failed to load order.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const items = order?.items || [];
-
-  const handleImageError = (e) => {
-    e.currentTarget.onerror = null;
-    e.currentTarget.src =
-      "https://placehold.co/80x80/FFFFFF/94A3B8?text=No+Image";
   };
 
   if (loading) {
@@ -128,11 +82,11 @@ function OrderDetails() {
       <>
         <Header showSearch={false} />
 
-        <div className="flex min-h-screen items-center justify-center bg-primary">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-slate-900">
-              Loading Order...
-            </h2>
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+            <p className="text-sm text-slate-600">Loading order...</p>
           </div>
         </div>
       </>
@@ -143,10 +97,11 @@ function OrderDetails() {
     return (
       <>
         <Header showSearch={false} />
-
-        <div className="flex min-h-screen items-center justify-center bg-primary">
-          <div className="rounded border border-rose-200 bg-rose-50 p-8">
-            <h2 className="font-semibold text-rose-700">{error}</h2>
+        <div className="min-h-screen p-5">
+          <div className="mx-auto max-w-6xl">
+            <div className="rounded-md border border-rose-200 bg-rose-50 p-12 text-center">
+              <h2 className="text-xl font-semibold text-rose-700">{error}</h2>
+            </div>
           </div>
         </div>
       </>
@@ -157,219 +112,345 @@ function OrderDetails() {
     <>
       <Header showSearch={false} />
 
-      <div className="min-h-screen bg-primary py-10">
-        <div className="mx-auto max-w-6xl px-5">
-          {/* Back sits outside the sheet */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-6 flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-accent hover:text-accent"
-          >
-            <FaArrowLeft />
-            Back
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
+        <div className="mx-auto max-w-6xl space-y-5 p-5">
+          {/* ─── 1. ORDER HEADER ─────────────────────────────────────────────── */}
+          <div className="rounded-md border border-slate-200 bg-white p-5">
+            {/* Back nav */}
+            <div className="mb-5 border-b border-slate-100 pb-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-accent"
+              >
+                <FaArrowLeft className="h-3.5 w-3.5" />
+                Back to My Orders
+              </button>
+            </div>
 
-          {/* Everything else lives inside one continuous white sheet */}
-          <div className="rounded border border-slate-200 bg-white p-6 sm:p-8">
-            {/* Title + badges */}
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-accent">
-                  Order Details
-                </p>
-                <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-                  Order #{order._id.slice(-8).toUpperCase()}
+            {/* Order identity row */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-1">
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                  Order #{order.orderCode || order._id.slice(-8).toUpperCase()}
                 </h1>
-                <p className="mt-2 text-sm text-slate-500">
-                  Review every detail about your purchase.
+                <p className="text-sm text-slate-500">
+                  Placed on {formatDate(order.createdAt)}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <span
-                  className={`rounded-full px-4 py-2 text-sm font-semibold ${getStatusStyles(
+                  className={`self-start rounded-full px-4 py-1.5 text-sm font-semibold ${getStatusBadge(
                     order.orderStatus
                   )}`}
                 >
                   {order.orderStatus}
                 </span>
 
-                <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
-                  {formatDate(order.createdAt)}
-                </span>
+                {order.orderStatus === "Delivered" && (
+                  <button
+                    onClick={() => downloadInvoice(order)}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-accent bg-white px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent hover:text-white"
+                  >
+                    <FaDownload className="h-3.5 w-3.5" />
+                    Invoice
+                  </button>
+                )}
               </div>
             </div>
+          </div>
 
-            {/* Order meta */}
-            <div className="mt-6 grid grid-cols-2 gap-6 border-t border-slate-100 pt-6 sm:grid-cols-4">
-              <InfoRow label="Order ID" value={order._id} />
-              <InfoRow label="Order Date" value={formatDate(order.createdAt)} />
-              <InfoRow label="Status" value={order.orderStatus} />
-              <InfoRow label="Payment" value={order.paymentMethod} />
-            </div>
-
-            {/* Progress */}
-            <div className="mt-8 border-t border-slate-100 pt-8">
-              <div className="mb-6">
-                <h2 className="text-base font-semibold text-slate-900">
-                  Order Progress
-                </h2>
-                <p className="text-sm text-slate-500">Current shipping progress</p>
-              </div>
-
-              <OrderStatusTracker currentStatus={order.orderStatus} />
-            </div>
-
-            {/* Customer + Delivery */}
-            <div className="mt-8 grid gap-8 border-t border-slate-100 pt-8 lg:grid-cols-2">
+          {/* ─── 2. ORDER PROGRESS TIMELINE ──────────────────────────────────── */}
+          <div className="rounded-md border border-slate-200 bg-white p-6">
+            <div className="mb-6 flex items-center gap-2">
+              <FaClipboardList className="h-4 w-4 text-slate-400" />
               <div>
-                <SectionHeading
-                  icon={FaUser}
-                  title="Customer Information"
-                  subtitle="Contact information of the customer"
-                />
-
-                <div className="space-y-4">
-                  <InfoRow label="Full Name" value={order.customerName} />
-                  <div className="border-t border-slate-100" />
-                  <InfoRow label="Email Address" value={order.email} />
-                  <div className="border-t border-slate-100" />
-                  <InfoRow label="Phone Number" value={order.phone} />
-                </div>
-              </div>
-
-              <div>
-                <SectionHeading
-                  icon={FaTruck}
-                  title="Delivery Information"
-                  subtitle="Shipping destination details"
-                />
-
-                <div className="space-y-4">
-                  <InfoRow label="Street Address" value={order.streetAddress} />
-
-                  <div className="border-t border-slate-100" />
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <InfoRow label="City" value={order.city} />
-                    <InfoRow label="District" value={order.district} />
-                  </div>
-
-                  <div className="border-t border-slate-100" />
-
-                  <InfoRow label="Postal Code" value={order.postalCode} />
-
-                  <div className="border-t border-slate-100" />
-
-                  <div>
-                    <div className="mb-1 flex items-center gap-2 text-slate-500">
-                      <FaLocationDot className="text-sm" />
-                      <p className="text-xs font-semibold uppercase tracking-wider">
-                        Delivery Notes
-                      </p>
-                    </div>
-                    <p className="text-sm font-medium text-slate-900">
-                      {order.deliveryNotes || "No delivery notes."}
-                    </p>
-                  </div>
-                </div>
+                <h2 className="text-base font-semibold text-slate-900">Order Progress</h2>
+                <p className="text-sm text-slate-500">Current delivery status</p>
               </div>
             </div>
 
-            {/* Ordered Products */}
-            <div className="mt-8 border-t border-slate-100 pt-8">
-              <SectionHeading
-                icon={FaBoxOpen}
-                title="Ordered Products"
-                subtitle="Items included in this order"
-              />
+            <OrderStatusTracker currentStatus={order.orderStatus} />
+          </div>
 
-              {items.length === 0 ? (
-                <div className="rounded border border-dashed border-slate-300 py-12 text-center text-sm text-slate-500">
-                  No products found.
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {items.map((item) => (
-                    <div
-                      key={item.productId}
-                      className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          onError={handleImageError}
-                          className="h-16 w-16 rounded border border-slate-200 bg-white object-contain p-1"
-                        />
-                        <div>
-                          <h3 className="text-sm font-semibold text-slate-900">
-                            {item.name}
-                          </h3>
-                          <p className="mt-1 text-sm text-slate-500">
-                            Qty <strong className="text-slate-700">{item.quantity}</strong>{" "}
-                            &middot; {formatPrice(item.price)} each
-                          </p>
-                        </div>
-                      </div>
-
-                      <p className="text-sm font-semibold text-accent sm:text-right">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Payment Summary */}
-            <div className="mt-8 border-t border-slate-100 pt-8">
-              <SectionHeading icon={FaCreditCard} title="Payment Summary" />
-
-              <div className="max-w-sm space-y-3 sm:ml-auto">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Subtotal</span>
-                  <span className="font-semibold text-slate-900">
-                    {formatPrice(order.subtotal)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Delivery Fee</span>
-                  <span className="font-semibold text-slate-900">
-                    {formatPrice(order.deliveryFee)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Discount</span>
-                  <span className="font-semibold text-slate-900">
-                    - {formatPrice(order.discount)}
-                  </span>
-                </div>
-
-                <div className="border-t border-slate-200 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-bold text-slate-900">
-                      Grand Total
-                    </span>
-                    <span className="text-xl font-bold text-accent">
-                      {formatPrice(order.grandTotal)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="rounded border border-accent/20 bg-accent/10 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-accent">
-                    Payment Method
+          {/* ─── 3. ORDER OVERVIEW (SUMMARY CARDS) ───────────────────────────── */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {/* Order Date */}
+            <div className="rounded-md border border-slate-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-500">Order Date</p>
+                  <p className="mt-1.5 truncate text-base font-semibold text-slate-900">
+                    {formatDate(order.createdAt)}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">
+                </div>
+                <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                  <FaCalendarDay size={18} />
+                </div>
+              </div>
+            </div>
+
+            {/* Grand Total — the one figure on this row that earns the accent color */}
+            <div className="rounded-md border border-slate-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-500">Grand Total</p>
+                  <p className="mt-1.5 text-xl font-semibold text-accent">
+                    {formatPrice(order.grandTotal)}
+                  </p>
+                </div>
+                <div className="flex-shrink-0 rounded-md bg-accent/10 p-3 text-accent">
+                  <FaMoneyBillWave size={18} />
+                </div>
+              </div>
+            </div>
+
+            {/* Total Items */}
+            <div className="rounded-md border border-slate-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-500">Total Items</p>
+                  <p className="mt-1.5 text-xl font-semibold text-slate-900">
+                    {order.items.length}
+                  </p>
+                </div>
+                <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                  <FaBoxOpen size={18} />
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="rounded-md border border-slate-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-500">Payment Method</p>
+                  <p className="mt-1.5 text-base font-semibold text-slate-900">
                     {order.paymentMethod}
                   </p>
+                </div>
+                <div className="flex-shrink-0 rounded-md bg-slate-100 p-3 text-slate-500">
+                  <FaCreditCard size={18} />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* ─── 4. CUSTOMER & SHIPPING INFORMATION ──────────────────────────── */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* Customer Information */}
+            <div className="rounded-md border border-slate-200 bg-white p-6">
+              <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+                <FaUser className="h-4 w-4 text-slate-400" />
+                <h2 className="text-base font-semibold text-slate-900">
+                  Customer Information
+                </h2>
+              </div>
+
+              <dl className="space-y-4">
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium text-slate-500">Full Name</dt>
+                  <dd className="text-sm font-medium text-slate-900">
+                    {order.customerName}
+                  </dd>
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium text-slate-500">Email Address</dt>
+                  <dd className="text-sm font-medium text-slate-900">{order.email}</dd>
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium text-slate-500">Phone Number</dt>
+                  <dd className="text-sm font-medium text-slate-900">{order.phone}</dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Delivery Information */}
+            <div className="rounded-md border border-slate-200 bg-white p-6">
+              <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+                <FaTruck className="h-4 w-4 text-slate-400" />
+                <h2 className="text-base font-semibold text-slate-900">
+                  Delivery Information
+                </h2>
+              </div>
+
+              <dl className="space-y-4">
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium text-slate-500">Street Address</dt>
+                  <dd className="text-sm font-medium text-slate-900">
+                    {order.streetAddress}
+                  </dd>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-xs font-medium text-slate-500">City</dt>
+                    <dd className="text-sm font-medium text-slate-900">{order.city}</dd>
+                  </div>
+
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-xs font-medium text-slate-500">District</dt>
+                    <dd className="text-sm font-medium text-slate-900">
+                      {order.district}
+                    </dd>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs font-medium text-slate-500">Postal Code</dt>
+                  <dd className="text-sm font-medium text-slate-900">
+                    {order.postalCode}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          {/* ─── 5. ORDERED PRODUCTS ──────────────────────────────────────────── */}
+          <div className="rounded-md border border-slate-200 bg-white p-6">
+            <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+              <FaBoxOpen className="h-4 w-4 text-slate-400" />
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Ordered Products</h2>
+                <p className="text-sm text-slate-500">
+                  {order.items.length} {order.items.length === 1 ? "item" : "items"} in
+                  this order
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-md border border-slate-200">
+              <table className="min-w-full divide-y divide-slate-100">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
+                      Product
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-500">
+                      Qty
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">
+                      Unit Price
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {order.items.map((item) => (
+                    <tr
+                      key={item.productId}
+                      className="transition-colors duration-150 hover:bg-slate-50"
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src =
+                                "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%25' height='100%25' fill='%23f1f5f9'/></svg>";
+                            }}
+                            className="h-14 w-14 flex-shrink-0 rounded-md border border-slate-200 bg-white object-contain p-1"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-slate-900">
+                              {item.name}
+                            </p>
+                            <p className="mt-0.5 text-xs text-slate-400">
+                              SKU: {item.productId?.slice(-8).toUpperCase() ?? "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-4 text-center">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                          {item.quantity}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-4 text-right text-sm text-slate-600">
+                        {formatPrice(item.price)}
+                      </td>
+
+                      <td className="px-4 py-4 text-right text-sm font-semibold text-slate-900">
+                        {formatPrice(item.price * item.quantity)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ─── 6. PAYMENT SUMMARY (HIGHLIGHTED) ─────────────────────────────── */}
+          <div className="rounded-md border border-accent/20 bg-accent/5 p-6">
+            <div className="mb-5 flex items-center gap-2 border-b border-accent/10 pb-4">
+              <FaMoneyBillWave className="h-4 w-4 text-accent" />
+              <h2 className="text-base font-semibold text-slate-900">Payment Summary</h2>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-600">Subtotal</span>
+                <span className="font-medium text-slate-900">
+                  {formatPrice(order.subtotal)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-600">Delivery Fee</span>
+                <span className="font-medium text-slate-900">
+                  {formatPrice(order.deliveryFee)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-slate-600">
+                  <FaTag className="h-3.5 w-3.5 text-slate-400" />
+                  Discount
+                </span>
+                <span className="font-medium text-slate-900">
+                  − {formatPrice(order.discount)}
+                </span>
+              </div>
+
+              <div className="mt-2 border-t border-accent/20 pt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-semibold text-slate-900">
+                    Grand Total
+                  </span>
+                  <span className="text-2xl font-semibold text-accent">
+                    {formatPrice(order.grandTotal)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── 7. ADDITIONAL INFORMATION (conditional) ──────────────────────── */}
+          {order.deliveryNotes && (
+            <div className="rounded-md border border-slate-200 bg-white p-6">
+              <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+                <FaInfoCircle className="h-4 w-4 text-slate-400" />
+                <h2 className="text-base font-semibold text-slate-900">
+                  Additional Information
+                </h2>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs font-medium text-slate-500">Delivery Notes</p>
+                <p className="mt-1 text-sm text-slate-700">{order.deliveryNotes}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -133,40 +133,13 @@ function MyMessageDetails() {
       <>
         <Header showSearch={false} />
 
-        <div className="mx-auto max-w-6xl px-4 py-20">
-          <div className="rounded border border-slate-300 bg-white p-10 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
-              <svg
-                className="h-8 w-8 animate-spin text-accent"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  className="opacity-25"
-                />
-                <path
-                  fill="currentColor"
-                  className="opacity-75"
-                  d="M4 12a8 8 0 018-8V0C5.373
-                  0 0 5.373 0 12h4zm2
-                  5.291A7.962 7.962 0
-                  014 12H0c0 3.042
-                  1.135 5.824
-                  3 7.938l3-2.647z"
-                />
-              </svg>
-            </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
 
-            <h2 className="text-xl font-semibold text-slate-900">
-              Loading Conversation
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-500">Please wait...</p>
+            <p className="text-sm text-slate-600">
+              Loading conversation...
+            </p>
           </div>
         </div>
       </>
@@ -235,6 +208,8 @@ function MyMessageDetails() {
   return (
     <>
       <Header showSearch={false} />
+
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-100">
 
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page header */}
@@ -370,6 +345,7 @@ function MyMessageDetails() {
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </>
