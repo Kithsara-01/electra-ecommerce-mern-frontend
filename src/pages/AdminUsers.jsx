@@ -132,6 +132,22 @@ function AdminUsers() {
   const selectClass =
     "rounded border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent";
 
+    if (loading) {
+      return (
+        <AdminLayout title="Users">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+              <p className="text-sm text-slate-600">
+                Loading users...
+              </p>
+            </div>
+          </div>
+        </AdminLayout>
+      );
+    }
+
   return (
     <AdminLayout title="Users">
       {/* Page Header */}
@@ -217,7 +233,7 @@ function AdminUsers() {
             </thead>
 
             <tbody>
-              {loading ? (
+               {users.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-10 text-center text-sm text-slate-500">
                     Loading users...

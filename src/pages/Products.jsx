@@ -143,6 +143,24 @@ const Products = () => {
     inStockOnly ||
     outOfStockOnly;
 
+    if (loading) {
+      return (
+        <>
+          <Header showSearch={false} />
+
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+              <p className="text-sm text-slate-600">
+                Loading products...
+              </p>
+            </div>
+          </div>
+        </>
+      );
+    }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header showSearch={false} />
@@ -316,25 +334,7 @@ const Products = () => {
               </div>
             )}
 
-            {loading ? (
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="animate-pulse overflow-hidden rounded-md border border-slate-200 bg-white"
-                  >
-                    <div className="h-64 bg-slate-200" />
-
-                    <div className="space-y-2 p-3">
-                      <div className="h-3 w-1/3 rounded bg-slate-200" />
-                      <div className="h-4 w-3/4 rounded bg-slate-200" />
-                      <div className="h-4 w-1/2 rounded bg-slate-200" />
-                      <div className="h-8 w-full rounded bg-slate-200" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : error ? (
+            {error ? (
               <div className="rounded-md border border-red-200 bg-red-50 p-8 text-center text-red-700">
                 <h2 className="text-lg font-semibold">
                   Unable to load products

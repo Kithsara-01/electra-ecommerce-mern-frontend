@@ -9,7 +9,7 @@ function Profile() {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-primary px-6 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-sky-100 px-6 py-10">
       <div className="w-full max-w-2xl rounded border border-slate-200 bg-white overflow-hidden">
 
         {/* Header */}

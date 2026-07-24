@@ -160,6 +160,23 @@ function AdminProducts() {
     }
   };
 
+
+      if (loading) {
+        return (
+          <AdminLayout title="Products">
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+                <p className="text-sm text-slate-600">
+                  Loading products...
+                </p>
+              </div>
+            </div>
+          </AdminLayout>
+        );
+      }
+
   return (
     <AdminLayout title="Products">
       {/* Page Header */}
