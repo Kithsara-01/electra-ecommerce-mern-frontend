@@ -161,21 +161,21 @@ function AdminProducts() {
   };
 
 
-      if (loading) {
-        return (
-          <AdminLayout title="Products">
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+  // if (loading) {
+  //   return (
+  //     <AdminLayout title="Products">
+  //       <div className="flex items-center justify-center py-20">
+  //         <div className="text-center">
+  //           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
 
-                <p className="text-sm text-slate-600">
-                  Loading products...
-                </p>
-              </div>
-            </div>
-          </AdminLayout>
-        );
-      }
+  //           <p className="text-sm text-slate-600">
+  //             Loading products...
+  //           </p>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <AdminLayout title="Products">
@@ -207,11 +207,24 @@ function AdminProducts() {
           <div className="relative">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
 
-            <input
+            {/* <input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-md border border-slate-200 py-2.5 pl-11 pr-4 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
+            /> */}
+
+
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => {
+                
+                setSearchTerm(e.target.value);
+              }}
+              
               className="w-full rounded-md border border-slate-200 py-2.5 pl-11 pr-4 text-sm text-slate-900 outline-none transition-colors focus:border-accent"
             />
           </div>
@@ -266,7 +279,18 @@ function AdminProducts() {
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              {products.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="py-12 text-center">
+                    <div className="flex flex-col items-center">
+                      <div className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+                      <p className="text-sm text-slate-500">
+                        Loading products...
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : products.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-20 text-center">
                     <div className="flex flex-col items-center">
@@ -342,17 +366,16 @@ function AdminProducts() {
                           type="button"
                           onClick={() => handleAvailabilityToggle(product)}
                           disabled={updatingProductId === product.productId}
-                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
-                            updatingProductId === product.productId
-                              ? "cursor-not-allowed opacity-60"
-                              : "cursor-pointer hover:bg-secondary"
-                          } ${product.isAvailable ? "bg-accent" : "bg-amber-500"}`}
+                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-colors ${updatingProductId === product.productId
+                            ? "cursor-not-allowed opacity-60"
+                            : "cursor-pointer hover:bg-secondary"
+                            } ${product.isAvailable ? "bg-accent" : "bg-amber-500"}`}
                         >
                           {updatingProductId === product.productId
                             ? "Updating..."
                             : product.isAvailable
-                            ? "Available"
-                            : "Not Available"}
+                              ? "Available"
+                              : "Not Available"}
                         </button>
                       </td>
 
@@ -374,11 +397,10 @@ function AdminProducts() {
                             title="Delete Product"
                             onClick={() => handleDelete(product)}
                             disabled={isDeleting}
-                            className={`inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition-colors ${
-                              isDeleting
-                                ? "cursor-not-allowed opacity-50"
-                                : "cursor-pointer hover:bg-rose-50 hover:text-rose-600"
-                            }`}
+                            className={`inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition-colors ${isDeleting
+                              ? "cursor-not-allowed opacity-50"
+                              : "cursor-pointer hover:bg-rose-50 hover:text-rose-600"
+                              }`}
                           >
                             <FaTrash />
                           </button>
@@ -401,11 +423,10 @@ function AdminProducts() {
             fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage - 1)
           }
           disabled={currentPage === 1 || loading}
-          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-            currentPage === 1 || loading
-              ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
-              : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
-          }`}
+          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${currentPage === 1 || loading
+            ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+            : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+            }`}
         >
           Previous
         </button>
@@ -421,11 +442,10 @@ function AdminProducts() {
             fetchProducts(searchTerm.trim(), selectedCategory, selectedSort, currentPage + 1)
           }
           disabled={currentPage === totalPages || loading}
-          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-            currentPage === totalPages || loading
-              ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
-              : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
-          }`}
+          className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${currentPage === totalPages || loading
+            ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400"
+            : "cursor-pointer border-accent bg-white text-accent hover:bg-accent hover:text-white"
+            }`}
         >
           Next
         </button>

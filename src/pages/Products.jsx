@@ -55,7 +55,7 @@ const Products = () => {
         if (isMounted) {
           setError(
             err?.response?.data?.message ||
-              "Something went wrong while loading products."
+            "Something went wrong while loading products."
           );
         }
       } finally {
@@ -143,23 +143,7 @@ const Products = () => {
     inStockOnly ||
     outOfStockOnly;
 
-    if (loading) {
-      return (
-        <>
-          <Header showSearch={false} />
 
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
-
-              <p className="text-sm text-slate-600">
-                Loading products...
-              </p>
-            </div>
-          </div>
-        </>
-      );
-    }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -334,7 +318,17 @@ const Products = () => {
               </div>
             )}
 
-            {error ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+                  <p className="text-sm text-slate-600">
+                    Loading products...
+                  </p>
+                </div>
+              </div>
+            ) : error ? (
               <div className="rounded-md border border-red-200 bg-red-50 p-8 text-center text-red-700">
                 <h2 className="text-lg font-semibold">
                   Unable to load products
@@ -343,68 +337,66 @@ const Products = () => {
                 <p className="mt-2 text-sm">{error}</p>
               </div>
             ) : displayProducts.length === 0 ? (
-              <div className="rounded-md border border-slate-200 bg-white p-10 text-center">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  No products available yet
-                </h2>
+            
+            <div className="rounded-md border border-slate-200 bg-white p-10 text-center">
+              <h2 className="text-lg font-semibold text-slate-900">
+                No products available yet
+              </h2>
 
-                <p className="mt-2 text-sm text-slate-600">
-                  Please check back later for new arrivals.
-                </p>
-              </div>
+              <p className="mt-2 text-sm text-slate-600">
+                Please check back later for new arrivals.
+              </p>
+            </div>
             ) : (
-              <>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {displayProducts.map((product) => (
-                    <ProductCard
-                      key={product.productId}
-                      product={product}
-                    />
-                  ))}
-                </div>
+            <>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {displayProducts.map((product) => (
+                  <ProductCard
+                    key={product.productId}
+                    product={product}
+                  />
+                ))}
+              </div>
 
-                {!loading && !error && totalProducts > 0 && (
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${
-                        currentPage === 1
-                          ? "cursor-not-allowed border-slate-200 text-slate-400"
-                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
+              {!loading && !error && totalProducts > 0 && (
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${currentPage === 1
+                        ? "cursor-not-allowed border-slate-200 text-slate-400"
+                        : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
                       }`}
-                    >
-                      &lt; Previous
-                    </button>
+                  >
+                    &lt; Previous
+                  </button>
 
-                    {visiblePageNumbers.map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`h-9 w-9 rounded border text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? "border-accent bg-accent text-white"
-                            : "border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
+                  {visiblePageNumbers.map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-9 w-9 rounded border text-sm font-medium transition-colors ${currentPage === page
+                          ? "border-accent bg-accent text-white"
+                          : "border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
                         }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${
-                        currentPage === totalPages
-                          ? "cursor-not-allowed border-slate-200 text-slate-400"
-                          : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
-                      }`}
                     >
-                      Next &gt;
+                      {page}
                     </button>
-                  </div>
-                )}
-              </>
+                  ))}
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`rounded border px-4 py-2 text-sm font-medium transition-colors ${currentPage === totalPages
+                        ? "cursor-not-allowed border-slate-200 text-slate-400"
+                        : "cursor-pointer border-slate-300 text-slate-700 hover:border-accent hover:text-accent"
+                      }`}
+                  >
+                    Next &gt;
+                  </button>
+                </div>
+              )}
+            </>
             )}
           </div>
         </div>

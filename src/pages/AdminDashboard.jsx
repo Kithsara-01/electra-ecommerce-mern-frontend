@@ -51,6 +51,7 @@ function AdminDashboard() {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
   const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const revenueChartRef = useRef(null);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ function AdminDashboard() {
 
   const loadDashboard = async () => {
     try {
+      setLoading(true);
       const response = await getDashboardStats();
 
       setStats(response.stats);
@@ -69,6 +71,9 @@ function AdminDashboard() {
 
     } catch (error) {
       console.log(error);
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -119,6 +124,25 @@ function AdminDashboard() {
   const cardBase =
     "rounded-lg border border-slate-200/70 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md";
 
+    
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+            <p className="text-sm text-slate-600">
+              Loading dashboard...
+            </p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+
+
   return (
     <AdminLayout>
       <div className="space-y-8 pb-4">
@@ -143,23 +167,23 @@ function AdminDashboard() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6">
           {cards.map((card) => (
             <div
-                key={card.title}
-                onClick={() => {
-                    if (card.scrollTo === "revenue-chart") {
-                      revenueChartRef.current?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
+              key={card.title}
+              onClick={() => {
+                if (card.scrollTo === "revenue-chart") {
+                  revenueChartRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
 
-                      return;
-                    }
+                  return;
+                }
 
-                    if (card.path) {
-                      navigate(card.path);
-                    }
-                  }}
-                className={`${cardBase} cursor-pointer p-5 sm:p-6`}
-              >
+                if (card.path) {
+                  navigate(card.path);
+                }
+              }}
+              className={`${cardBase} cursor-pointer p-5 sm:p-6`}
+            >
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-500">

@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 import AdminLayout from "../components/AdminLayout";
-import {getAllUsers, blockUser, unblockUser} from "../services/userService";
+import { getAllUsers, blockUser, unblockUser } from "../services/userService";
 
 function AdminUsers() {
   const navigate = useNavigate();
@@ -132,21 +132,21 @@ function AdminUsers() {
   const selectClass =
     "rounded border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-accent";
 
-    if (loading) {
-      return (
-        <AdminLayout title="Users">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+  // if (loading) {
+  //   return (
+  //     <AdminLayout title="Users">
+  //       <div className="flex items-center justify-center py-20">
+  //         <div className="text-center">
+  //           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
 
-              <p className="text-sm text-slate-600">
-                Loading users...
-              </p>
-            </div>
-          </div>
-        </AdminLayout>
-      );
-    }
+  //           <p className="text-sm text-slate-600">
+  //             Loading users...
+  //           </p>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <AdminLayout title="Users">
@@ -233,10 +233,18 @@ function AdminUsers() {
             </thead>
 
             <tbody>
-               {users.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                    Loading users...
+                  <td colSpan={6} className="py-10">
+                    <div className="flex items-center justify-center py-10">
+                      <div className="text-center">
+                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-accent"></div>
+
+                        <p className="text-sm text-slate-600">
+                          Loading users...
+                        </p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
@@ -283,11 +291,10 @@ function AdminUsers() {
                       </div>
 
                       <div
-                        className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-medium ${
-                          user.role === "Admin"
+                        className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-medium ${user.role === "Admin"
                             ? "bg-accent/10 text-accent"
                             : "bg-slate-100 text-slate-700"
-                        }`}
+                          }`}
                       >
                         {user.role}
                       </div>
@@ -326,11 +333,10 @@ function AdminUsers() {
                         <button
                           onClick={() => handleToggleBlock(user)}
                           disabled={user.role === "Admin"}
-                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium text-white transition-colors ${
-                            user.isBlocked
+                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium text-white transition-colors ${user.isBlocked
                               ? "bg-accent hover:bg-secondary"
                               : "bg-rose-600 hover:bg-rose-700"
-                          } disabled:cursor-not-allowed disabled:bg-slate-300`}
+                            } disabled:cursor-not-allowed disabled:bg-slate-300`}
                         >
                           {user.isBlocked ? (
                             <>
