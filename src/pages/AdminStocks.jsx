@@ -227,8 +227,8 @@ function AdminStocks() {
       <div className="space-y-6">
         {/* Page intro — AdminLayout's header already shows the "Stock
             Management" title, so this is just the supporting description. */}
-        <p className="text-sm text-slate-500">
-          Monitor and manage product inventory across your store.
+        <p className="text-sm text-black">
+          <b><i>● Monitor and Manage product inventory across your store.</i></b>
         </p>
 
         {/* Error state */}

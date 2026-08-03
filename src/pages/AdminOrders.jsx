@@ -230,9 +230,9 @@ function AdminOrders() {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Order Management</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Track, manage and update customer orders in real time.
+            
+            <p className="mt-1 text-sm text-black">
+              <b><i>● Track, Manage and Update customer orders in real time.</i></b>
             </p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent">
