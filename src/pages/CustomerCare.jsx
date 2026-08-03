@@ -87,8 +87,8 @@ function CustomerCare() {
     <AdminLayout title="Customer Care">
       <div className="space-y-6">
         {/* Page intro — AdminLayout's header already shows the title */}
-        <p className="text-sm text-slate-500">
-          View and respond to messages submitted through the Contact page.
+        <p className="text-sm text-black">
+          <b><i>● View and Respond to messages submitted from the Contact page.</i></b>
         </p>
 
         {unreadCount > 0 && (
