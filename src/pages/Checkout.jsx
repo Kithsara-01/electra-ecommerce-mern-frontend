@@ -10,7 +10,8 @@ import { useAuth } from "../context/AuthContext";
 
 import { getCart } from "../services/cartService";
 import { placeOrder } from "../services/orderService";
-import { getDeliveryFee, getEstimatedDelivery,} from "../utils/delivery";
+import { initializePayment } from "../services/paymentService";
+import { getDeliveryFee, getEstimatedDelivery, } from "../utils/delivery";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ function Checkout() {
   const postalCodeRef = useRef(null);
   const termsRef = useRef(null);
 
-  
+
 
   // ===============================================
   // LOAD DATA
@@ -368,6 +369,49 @@ function Checkout() {
     try {
       setPlacingOrder(true);
 
+      if (paymentMethod === "PayHere") {
+
+        const names = fullName.trim().split(" ");
+
+        const response = await initializePayment({
+          orderId: `ORDER_${Date.now()}`,
+          amount: grandTotal,
+
+          firstName: names[0] || "",
+          lastName: names.slice(1).join(" "),
+          email,
+          phone,
+          address: streetAddress,
+          city,
+        });
+
+        const payment = response.paymentData;
+
+        const form = document.createElement("form");
+
+        form.method = "POST";
+
+        form.action = "https://sandbox.payhere.lk/pay/checkout";
+
+        Object.keys(payment).forEach((key) => {
+
+          const hiddenField = document.createElement("input");
+
+          hiddenField.type = "hidden";
+
+          hiddenField.name = key;
+
+          hiddenField.value = payment[key];
+
+          form.appendChild(hiddenField);
+
+        });
+
+        document.body.appendChild(form);
+
+        form.submit();
+      }
+
       await placeOrder({
         customerName: fullName,
         email,
@@ -419,10 +463,9 @@ function Checkout() {
   }
 
   const inputClass = (hasError) =>
-    `w-full rounded border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors ${
-      hasError
-        ? "border-rose-400 focus:border-rose-400"
-        : "border-slate-200 focus:border-accent"
+    `w-full rounded border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors ${hasError
+      ? "border-rose-400 focus:border-rose-400"
+      : "border-slate-200 focus:border-accent"
     }`;
 
   return (
@@ -688,24 +731,52 @@ function Checkout() {
                     )}
                   </label>
 
-                  {/* Credit / Debit Card */}
-                  <label className="relative flex cursor-not-allowed rounded border border-slate-100 p-4 opacity-50">
+                  {/* PayHere */}
+                  <label className="relative flex cursor-pointer rounded border border-slate-200 p-4 transition-colors hover:border-accent">
                     <input
                       type="radio"
                       name="payment"
-                      value="Credit Card"
-                      disabled
-                      className="mt-1 h-4 w-4 cursor-not-allowed accent-slate-400"
+                      value="PayHere"
+                      checked={paymentMethod === "PayHere"}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="mt-1 h-4 w-4 cursor-pointer accent-accent"
                     />
+
                     <div className="ml-3.5 flex flex-1 flex-col">
                       <span className="text-sm font-semibold text-slate-900">
-                        Credit / Debit Card
+                        PayHere
                       </span>
+
                       <span className="text-xs text-slate-500">
-                        Coming Soon
+                        Pay securely using Visa, MasterCard, Genie, Frimi and more.
+                      </span>
+
+                      <span className="mt-1 text-xs font-medium text-accent">
+                        Secure Online Payment
                       </span>
                     </div>
+
+                    {paymentMethod === "PayHere" && (
+                      <div className="flex items-center">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent">
+                          <svg
+                            className="h-3 w-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
                   </label>
+
 
                   {/* Bank Transfer */}
                   <label className="relative flex cursor-not-allowed rounded border border-slate-100 p-4 opacity-50">
