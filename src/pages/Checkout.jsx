@@ -373,6 +373,23 @@ function Checkout() {
 
         const names = fullName.trim().split(" ");
 
+        const pendingOrder = {
+          customerName: fullName,
+          email,
+          phone,
+          streetAddress,
+          city,
+          district,
+          postalCode,
+          deliveryNotes,
+          paymentMethod,
+        };
+
+        localStorage.setItem(
+          "pendingOrder",
+          JSON.stringify(pendingOrder)
+        );
+
         const response = await initializePayment({
           orderId: `ORDER_${Date.now()}`,
           amount: grandTotal,
@@ -410,6 +427,8 @@ function Checkout() {
         document.body.appendChild(form);
 
         form.submit();
+
+        return;
       }
 
       await placeOrder({
@@ -778,7 +797,7 @@ function Checkout() {
                   </label>
 
 
-                  {/* Bank Transfer */}
+                  {/* Bank Transfer
                   <label className="relative flex cursor-not-allowed rounded border border-slate-100 p-4 opacity-50">
                     <input
                       type="radio"
@@ -795,7 +814,8 @@ function Checkout() {
                         Coming Soon
                       </span>
                     </div>
-                  </label>
+                  </label> */}
+                  
                 </div>
               </div>
 
