@@ -23,3 +23,10 @@ export const deleteReview = async (id) => {
   const response = await API.delete(`/reviews/${id}`);
   return response.data;
 };
+
+
+// Get All Reviews (Admin)
+export const getAllReviews = async () => {
+  const response = await API.get("/reviews/admin");
+  return response.data;
+};

@@ -41,6 +41,7 @@ import AdminOrderDetails from "./pages/AdminOrderDetails";
 import AdminStocks from "./pages/AdminStocks";
 import AdminRevenue from "./pages/AdminRevenue";
 import CustomerCare from "./pages/CustomerCare";
+import AdminReviews from "./pages/AdminReviews";
 import CustomerCareDetails from "./pages/CustomerCareDetails";
 
 // Scopes AdminNotificationProvider to just the /admin* route tree, so the
@@ -125,6 +126,7 @@ function App() {
           <Route path="/admin/users/:id" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminUserDetails /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/orders/:orderId" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminOrderDetails /></ProtectedRoute>} />
+          <Route path="/admin/reviews" element={<ProtectedRoute allowedRoles={["Admin"]}><AdminReviews /></ProtectedRoute>} />
           <Route path="/admin/customer-care" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCare /> </ProtectedRoute>} />
           <Route path="/admin/customer-care/:id" element={<ProtectedRoute allowedRoles={["Admin"]}> <CustomerCareDetails />
           </ProtectedRoute>

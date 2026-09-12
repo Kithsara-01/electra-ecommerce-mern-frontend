@@ -11,6 +11,7 @@ import {
   FaShoppingCart,
   FaBoxes,
   FaHeadset,
+  FaStar,
 } from "react-icons/fa";
 
 const NAV_ITEMS = [
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { to: "/admin/users", label: "Users", icon: FaUsers },
   { to: "/admin/orders", label: "Orders", icon: FaShoppingCart },
   { to: "/admin/stocks", label: "Stock Management", icon: FaBoxes },
+  { to: "/admin/reviews", label: "Reviews", icon: FaStar },
 ];
 
 function AdminLayout({ title = "Admin Dashboard", children }) {

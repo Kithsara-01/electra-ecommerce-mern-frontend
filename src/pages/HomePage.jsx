@@ -17,7 +17,7 @@ import {
   FaStar,
 } from "react-icons/fa";
 
-import heroImage from "../assets/images/hero-image.png";
+//import heroImage from "../assets/images/hero-image.png";
 
 
 function HomePage() {
@@ -26,17 +26,20 @@ function HomePage() {
   const { user, loading } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState([]);
 
+
+
+
   const fetchProducts = async () => {
-      try {
-        const response = await getAllProducts();
+    try {
+      const response = await getAllProducts();
 
-        setFeaturedProducts((response.products || []).slice(0, 4));
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      setFeaturedProducts((response.products || []).slice(0, 4));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
- useEffect(() => {
+  useEffect(() => {
     if (loading) return;
 
     if (user?.role === "Admin") {
@@ -103,27 +106,65 @@ function HomePage() {
     },
   ];
 
+  const textShineStyle = `
+  @keyframes textShine {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
+`;
+
   return (
     <>
       <Header showSearch={false} />
 
       <main className="min-h-screen bg-slate-50">
         {/* Hero */}
-        <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-12 px-6 py-20 lg:flex-row">
-            {/* Left Content */}
-            <div className="max-w-xl">
+        {/* Hero */}
+        <section className="relative min-h-[620px] overflow-hidden border-b border-slate-200">
+          {/* Background Video */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          >
+            <source src="/electra-hero-video.mp4" type="video/mp4" />
+          </video>
+
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-black/55" />
+
+          {/* Hero Content */}
+          <div className="relative z-10 mx-auto flex min-h-[620px] max-w-7xl items-center px-6 py-20">
+            <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
                 Electra Store
               </p>
 
-              <h1 className="mt-3 text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
+              <style>{textShineStyle}</style>
+
+              <h1
+                className="mt-3 text-4xl font-bold leading-tight lg:text-6xl"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(90deg, #ffffff 0%, #ffffff 40%, #dffcf7 50%, #ffffff 60%, #ffffff 100%)",
+                  backgroundSize: "200% auto",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  animation: "textShine 4s linear infinite",
+                }}
+              >
                 Premium Electronics
                 <br />
                 For Everyday Life
               </h1>
 
-              <p className="mt-5 text-base leading-7 text-slate-600">
+              <p className="mt-5 max-w-xl text-base leading-7 text-white/80">
                 Discover laptops, monitors, printers, networking devices and
                 accessories from trusted brands at competitive prices.
               </p>
@@ -138,21 +179,11 @@ function HomePage() {
 
                 <button
                   onClick={() => navigate("/products")}
-                  className="cursor-pointer rounded border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-accent hover:text-accent"
+                  className="cursor-pointer rounded border border-white/40 bg-white/10 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-secondary"
                 >
                   Browse Products
                 </button>
               </div>
-            </div>
-
-            {/* Right Content */}
-            {/* Right Content */}
-            <div className="flex justify-center lg:justify-end">
-              <img
-                src={heroImage}
-                alt="Electra Premium Electronics"
-                className="w-full max-w-[700px] object-contain"
-              />
             </div>
           </div>
         </section>
