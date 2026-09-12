@@ -22,10 +22,15 @@ function Cart() {
     try {
       if (showLoading) {
         setLoading(true);
-        }
+      }
       setError("");
       const response = await getCart();
-      setCartItems(response.cart.items || []);
+
+      const validCartItems = (response.cart.items || []).filter(
+        (item) => item?.productId
+      );
+
+      setCartItems(validCartItems);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to load cart";
@@ -34,7 +39,7 @@ function Cart() {
     } finally {
       if (showLoading) {
         setLoading(false);
-        }
+      }
     }
   };
 
