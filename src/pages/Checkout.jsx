@@ -80,7 +80,13 @@ function Checkout() {
   const loadCart = async () => {
     try {
       const response = await getCart();
-      setCartItems(response.cart.items || []);
+      console.log("Checkout Cart Response:", response);
+
+      const validCartItems = (response.cart.items || []).filter(
+        (item) => item?.productId
+      );
+
+      setCartItems(validCartItems);
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to load cart."
@@ -815,7 +821,7 @@ function Checkout() {
                       </span>
                     </div>
                   </label> */}
-                  
+
                 </div>
               </div>
 
